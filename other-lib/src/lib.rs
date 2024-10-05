@@ -15,7 +15,6 @@ pub fn greeting(name: &str) -> String {
     format!("Hello {}!", name)
 }
 
-
 pub struct Guess {
     value: i32,
 }
@@ -30,7 +29,7 @@ impl Guess {
             panic!("Guess value must be less than 100")
         }
 
-        Guess{ value }
+        Guess { value }
     }
 }
 
@@ -53,7 +52,6 @@ mod tests {
         assert!(larger.can_hold(&smaller));
     }
 
-    
     #[test]
     fn greeting_test() {
         let actual = greeting("Omar");
@@ -63,29 +61,32 @@ mod tests {
     #[test]
     fn greeting_contains_name() {
         let actual = greeting("Barra");
-        assert!(actual.contains("Barra"), "It does not contain name, value was {}", actual)
+        assert!(
+            actual.contains("Barra"),
+            "It does not contain name, value was {}",
+            actual
+        )
     }
 
     #[test]
     #[should_panic]
     fn it_is_0() {
-       Guess::new(0);
+        Guess::new(0);
     }
 
     #[test]
     #[should_panic(expected = "Guess value must be less than 100")]
     fn greater_than_100() {
-       Guess::new(400);
+        Guess::new(400);
     }
 
     // test return a result type
     #[test]
     fn it_works() -> Result<(), String> {
-       if 2 + 3 == 4 {
-        Ok(())
-       } else {
-           Err(String::from("Some silly error"))
-       }
+        if 2 + 3 == 4 {
+            Ok(())
+        } else {
+            Err(String::from("Some silly error"))
+        }
     }
-
 }
