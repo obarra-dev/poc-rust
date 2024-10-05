@@ -1,0 +1,15 @@
+rustc --version
+cargo new hello
+cargno new --lib my_rust_proyect
+cargo run
+cargo test
+cargo test --quiet
+cargo test --package my_rust_lib --lib -- tests --show-output 
+cargo test --package my_rust_lib --lib -- tests::it_works_assuredly --exact --show-output 
+cargo test --package my_rust_lib --lib -- tests::adder --show-output 
+
+
+
+generic
+trais
+lifetimes
