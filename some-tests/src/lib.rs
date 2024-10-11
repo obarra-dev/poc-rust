@@ -260,6 +260,27 @@ mod tests {
         0
     }
 
+    
+    #[test]
+    fn diverging_function() {
+        // expression is a function, macro, {} due to they retuns something
+        let a = {
+            let x = 3;
+            x + 1
+        };
+        assert_eq!(a, 4);
+
+        // semicolon suppresses this expression, so it returns unit type, nothing
+        let b = {
+            let x = 3;
+            x + 1;
+        };
+        assert_eq!(b, ());
+
+        let b = my_function(4);
+        assert_eq!(b, 14)
+    }
+
     #[test]
     fn string_test() {
         let a = String::from("omar");
@@ -288,4 +309,75 @@ mod tests {
         }
         assert_eq!(sum, 294);
     }
+
+    #[test]
+    fn ownership() {
+        // owner and other_owner are saved on stack
+        let owner = 4;
+        // Rust makes a copy of the value and set on other_owner, because these types have a know size
+        let other_owner = owner;
+
+        assert_eq!(owner, 4);
+        assert_eq!(other_owner, 4);
+
+          // it is saved on HEAP
+        let  s = String::from("omar");
+        let x = s;
+        assert_eq!(x, "omar");
+        // it does not compile, rule 2 is violated, error is: borrow of moved value: `s`
+        // assert_eq!(s, "omar");
+    }
+
+
+    
+    #[test]
+    fn ownership_heap() {
+        let  s = String::from("omar");
+        let x = drop_string(s);
+        assert_eq!(x, ());
+        // does not compile. As drop_string has finished, all the values were dropped. So "omar" was removed from HEAP
+      // assert_eq!(s, "omar");
+
+        let  s = String::from("omar");
+        let x = return_ownership(s);
+        assert_eq!(x, "omar");
+        // it does not compile, rule 2 and 3 are violated, error is: borrow of moved value: `s`
+        // does not compile. As return_ownership returns the ownership to x
+      // assert_eq!(s, "omar");
+    }
+
+    // does not drop string and return ownership
+    fn return_ownership(some_string: String) -> String {
+        some_string
+    }
+
+    // does not drop string and return ownership
+    fn drop_string(some_string: String)  {
+    }
+
+
+    #[test]
+    fn borrowing() {
+        let s = String::from("omar");
+        // x and z are read only
+        let x = &s;
+        let z = &s;
+
+        assert_eq!(s, "omar");
+        assert_eq!(x, "omar");
+        assert_eq!(z, "omar");
+
+
+        let mut s = String::from("omar");
+        {
+            let x: = &mut s;
+            x.push_str("barra");
+            x.clear();
+            
+        }
+        // x and z are read only
+       
+    }
+
+
 }
