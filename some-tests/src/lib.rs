@@ -261,23 +261,34 @@ mod tests {
     }
 
     #[test]
+    #[should_panic]
     fn diverging_function() {
-        // expression is a function, macro, {} due to they retuns something
-        let a = {
-            let x = 3;
-            x + 1
-        };
-        assert_eq!(a, 4);
+        never_return();
+        // the next line is unrechable
+    }
 
-        // semicolon suppresses this expression, so it returns unit type, nothing
-        let b = {
-            let x = 3;
-            x + 1;
-        };
-        assert_eq!(b, ());
+    fn never_return() -> ! {
+        // all of them are equivalent
+        unimplemented!()
+        // panic!(), todo!()
+    }
 
-        let b = my_function(4);
-        assert_eq!(b, 14)
+    #[test]
+    fn diverging_function_1() {
+        // TODO
+        //get_option()
+    }
+
+    fn get_option(a: u8) -> Option<i32> {
+        let r = match a {
+            1 => Some(32),
+            _ => None,
+        };
+
+        return r;
+        // Rather that return None, we use a divergin function instead
+        // TODO check it out
+        never_return();
     }
 
     #[test]
@@ -313,7 +324,7 @@ mod tests {
     fn ownership() {
         // owner and other_owner are saved on stack
         let owner = 4;
-        // Rust makes a copy of the value and set on other_owner, because these types have a know size
+        // Rust makes a copy of the value and set on other_owner, because these types have a know size (fized size) and it is cheap
         let other_owner = owner;
 
         assert_eq!(owner, 4);
@@ -321,10 +332,21 @@ mod tests {
 
         // it is saved on HEAP
         let s = String::from("omar");
+        // only the pointers is copied, move
         let x = s;
         assert_eq!(x, "omar");
         // it does not compile, rule 2 is violated, error is: borrow of moved value: `s`
+        // so s will be dropped (ptr, len, capacity of s will be droped) and cannot be used after assigning it to X to avoid dangling pointers
         // assert_eq!(s, "omar");
+    }
+
+    #[test]
+    fn ownership_deep_copy() {
+        let s = String::from("omar");
+        // allocate a new heap memory
+        let x = s.clone();
+        assert_eq!(x, "omar");
+        assert_eq!(s, "omar");
     }
 
     #[test]
@@ -332,8 +354,15 @@ mod tests {
         let s = String::from("omar");
         let x = drop_string(s);
         assert_eq!(x, ());
-        // does not compile. As drop_string has finished, all the values were dropped. So "omar" was removed from HEAP
+        // does not compile
+        // as s's value moves into drop_string function, that function take the ownership
+        // plus drop_string has finished, all the values were dropped. So "omar" was removed from HEAP, the baking memory is freed
         // assert_eq!(s, "omar");
+
+        // gives_owrnership moves its return value into s, so the bakin momemory is not fred
+        let s = gives_owrnership();
+        assert_eq!(s, "omar");
+
 
         let s = String::from("omar");
         let x = return_ownership(s);
@@ -341,6 +370,15 @@ mod tests {
         // it does not compile, rule 2 and 3 are violated, error is: borrow of moved value: `s`
         // does not compile. As return_ownership returns the ownership to x
         // assert_eq!(s, "omar");
+
+        // NOTE when the main funcion ends, ALL the variables will be dropped.
+
+        // question, when re-assing a heap variable when the previos one is removed?
+    }
+
+    // does not drop string and return ownership
+    fn gives_owrnership() -> String {
+        String::from("omar")
     }
 
     // does not drop string and return ownership
