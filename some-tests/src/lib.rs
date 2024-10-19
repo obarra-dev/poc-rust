@@ -111,6 +111,11 @@ mod tests {
         assert_eq!(explicitly_ret_unit(), implicitly_ret_unit());
     }
 
+    struct Point {
+        x: i32,
+        y: i32,
+    }
+
     #[test]
     fn tuple_destructuring() {
         let (x, y, z) = ('o', true, 4);
@@ -132,6 +137,15 @@ mod tests {
         // destructuring the second one
         [.., b] = [1, 2];
         assert_eq!([a, b], [3, 2]);
+    }
+
+    #[test]
+    fn destructuring_struct() {
+        let p = Point { x: 1, y: 2 };
+        // destructuring the struct
+        let Point { x, y } = p;
+        assert_eq!(x, 1);
+        assert_eq!(y, 2);
     }
 
     #[test]
@@ -363,7 +377,6 @@ mod tests {
         let s = gives_owrnership();
         assert_eq!(s, "omar");
 
-
         let s = String::from("omar");
         let x = return_ownership(s);
         assert_eq!(x, "omar");
@@ -390,6 +403,89 @@ mod tests {
     fn drop_string(some_string: String) {}
 
     #[test]
+    fn ownership_change_mutability() {
+        // s cannot be changed, it is immutable
+        let s = String::from("omar");
+
+        // it does not compile, error: cannot borrow `s` as mutable, as it is not declared as mutable
+        // s.push_str(" barra");
+
+        // when ownership is transferred, the variable can be mutable
+        let mut s1 = s;
+        s1.push_str(" barra");
+        assert_eq!(s1, "omar barra");
+    }
+
+    #[test]
+    fn ownership_derefering() {
+        // Box allows to store data on the heap
+        let mut v = Box::new(4);
+
+        // derefering
+        *v = 44;
+        assert_eq!(*v, 44);
+    }
+
+    #[derive(Debug)]
+    struct Person {
+        name: String,
+        age: Box<u8>,
+    }
+
+    #[test]
+    fn ownership_complete_move() {
+        let p = Person {
+            name: String::from("omar"),
+            age: Box::new(4),
+        };
+
+        // question how can to it?
+        // assert_eq!(p, Person { name: String::from("omar"), age: Box::new(4) });
+
+        println!("the person struct is: {:?}", p);
+
+        let Person { name, age } = p;
+
+        // does not compile as p is moved to name and age
+        // println!("the person struct is: {:?}", p);
+
+        assert_eq!(name, "omar");
+        assert_eq!(*age, 4);
+    }
+
+    #[test]
+    fn ownership_partial_move() {
+        let p = Person {
+            name: String::from("omar"),
+            age: Box::new(4),
+        };
+
+        println!("the person struct is: {:?}", p);
+
+        // name is moved out of person, but age is referced
+        let Person { name, ref age } = p;
+
+        // does not compile as borrow of partially moved value: `p` partial moves occurs
+        // println!("the person struct is: {:?}", p);
+
+        assert_eq!(name, "omar");
+        // it works as age is a reference
+        assert_eq!(*p.age, 4);
+        // does not compile, as p is moved
+        // assert_eq!(p.name, "omar");
+
+        // age can be used for read only
+        println!("age is: {}", age);
+        // does not compile, question, why cannot assert age?
+        //  assert_eq!(age, 4);
+
+        let t = (String::from("omar"), String::from("barra"));
+        // t.0 is moved to _s, so it canot be used
+        let _s = t.0;
+        assert_eq!(t.1, "barra");
+    }
+
+    #[test]
     fn borrowing() {
         let s = String::from("omar");
         // x and z are read only
@@ -407,5 +503,14 @@ mod tests {
             //x.clear();
         }
         // x and z are read only
+    }
+
+    #[test]
+    fn string() {
+        // string literary, type &str
+        // string literary is a hardcode in the binary itself
+        // so the size is known at compile time
+        let s = "omar";
+        assert_eq!(s, "omar");
     }
 }
