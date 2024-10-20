@@ -4,7 +4,7 @@ pub fn add(left: u64, right: u64) -> u64 {
 
 #[cfg(test)]
 mod tests {
-    use core::slice;
+    use core::{panic, slice};
     use std::{arch::x86_64, fmt::format, i32, ops::RangeInclusive};
 
     use super::*;
@@ -938,5 +938,102 @@ mod tests {
     fn tuple_struct() {
         let color = Color(255, 0, 0);
         assert_eq!(color.0, 255);
+    }
+
+    #[test]
+    fn unit_like_structs() {
+        struct UnitLikeStruct;
+        let _unit_like_struct = UnitLikeStruct;
+        // TODO
+    }
+
+    #[test]
+    fn enum_test() {
+        enum IpAddrKind {
+            V4(String),
+            V6(String),
+        };
+
+        let home = IpAddrKind::V4(String::from("127.0.0.1"));
+        let loopback = IpAddrKind::V6(String::from("::1"));
+
+        #[derive(PartialEq, Debug)]
+        enum Number {
+            Zero,
+            One,
+            Two,
+        };
+
+        let number = Number::One;
+        assert_eq!(number, Number::One);
+        assert_eq!(number as u8, 1);
+
+        #[derive(PartialEq, Debug)]
+        enum NumberOdd {
+            Zero = 10,
+            One,
+            Two,
+        };
+        let number = NumberOdd::Two;
+        assert_eq!(number, NumberOdd::Two);
+        assert_eq!(number as u8, 12);
+
+        // each enum varian can hold its own data
+        #[derive(PartialEq, Debug)]
+        enum Message {
+            Quit,
+            Move { x: i32, y: i32 },
+            Write(String),
+            ChangeColor(i32, i32, i32),
+        };
+        let m = Message::Write(String::from("omar"));
+        // question: how to extract the value for non primitive types?
+        // assert_eq!(m as String, "omar");
+        assert_eq!(m, Message::Write(String::from("omar")));
+        let s = format!("{:?}", m);
+        assert_eq!(s, "Write(\"omar\")");
+
+        let m = Message::Quit;
+        let s = format!("{:?}", m);
+        assert_eq!(s, "Quit");
+        // assert_eq!(m as u8, 1);
+
+        let m = Message::Move { x: 1, y: 2 };
+        let s = format!("{:?}", m);
+        assert_eq!(s, "Move { x: 1, y: 2 }");
+
+        let m = Message::ChangeColor(1, 2, 3);
+        let s = format!("{:?}", m);
+        assert_eq!(s, "ChangeColor(1, 2, 3)");
+
+        let m = Message::Move { x: 1, y: 2 };
+        if let Message::Move { x, y } = m {
+            assert_eq!(x, 1);
+            assert_eq!(y, 2);
+        } else {
+            panic!("NEVER LET THIS RUN");
+        }
+
+        let messages = [
+            Message::Quit,
+            Message::Move { x: 1, y: 2 },
+            Message::Write(String::from("omar")),
+        ];
+        for m in messages {
+            match m {
+                Message::Quit => assert_eq!(format!("{:?}", m), "Quit"),
+                Message::Move { x, y } => {
+                    assert_eq!(format!("{:?}", m), "Move { x: 1, y: 2 }");
+                    assert_eq!(x, 1);
+                    assert_eq!(y, 2);
+                }
+                Message::Write(s) => {
+                    // question: why partionally moved?
+                    // assert_eq!(format!("{:?}", m), "Write(\"omar\")");
+                    assert_eq!(s, "omar");
+                }
+                _ => panic!("NEVER LET THIS RUN"),
+            }
+        }
     }
 }
