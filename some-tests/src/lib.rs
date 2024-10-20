@@ -733,4 +733,57 @@ mod tests {
         }
         assert_eq!(s, "学学中中文文");
     }
+
+    #[test]
+    fn array() {
+        // infers the type is [i32; 3]
+        let arr = [1, 2, 3];
+        assert_eq!(arr.len(), 3);
+        //size_of_val  retuns the bytes which an array occupies in memory
+        assert_eq!(std::mem::size_of_val(&arr), 12);
+
+
+        // all elements in an array can be inisialized with the same value at once
+        let arr = [4; 4];
+        assert_eq!(arr.len(), 4);
+        assert_eq!(arr[0], 4);
+        assert_eq!(arr[3], 4);
+
+          // does not compile, as the array is not mutable
+        // arr[0] = 4;
+
+
+        let arr = ["omar", "barra"];
+        // panic if the index is out of bounds
+        // assert_eq!(arr[7], "omar");
+
+        // we can use index to access the elements but is not safe
+        // option is a safe way to access the elements
+        // question: how to test it?
+        let optional = arr.get(7);
+
+        // a is mutable, so we can change the values
+        let mut a = [1, 2, 3];
+        a[0] = 4;
+        assert_eq!(a[0], 4);
+
+        // other way
+        let mut a = [1, 2, 3];
+        let x = &mut a[0];
+        *x = 4;
+        assert_eq!(a[0], 4);
+
+        let a = [1, 2, 3];
+        let x = &a[0];
+        // question: &1 what is it?
+        assert_eq!(x, &1);
+        
+
+        let mut a = [1, 2, 3];
+        let x = &a[0];
+        assert_eq!(x, &1);
+        let y = &mut a[0];
+        *y = 4;
+        assert_eq!(a[0], 4);
+    }
 }
