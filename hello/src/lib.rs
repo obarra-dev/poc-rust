@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::operation::sub;
+    use crate::operations::sub;
 
     #[test]
     fn test_something() {
