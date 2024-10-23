@@ -1,5 +1,5 @@
-mod operations;
 mod helpers;
+mod operations;
 use std::io;
 
 fn main() {

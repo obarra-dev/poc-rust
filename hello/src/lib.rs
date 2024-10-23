@@ -1,3 +1,5 @@
+mod operations;
+
 #[cfg(test)]
 mod tests {
     use crate::operations::sub;
@@ -8,7 +10,7 @@ mod tests {
     }
 
     #[test]
-    fn test_something() {
-        assert_eq!(sub(4, 1), 5);
+    fn test_sub() {
+        assert_eq!(sub(4, 1), 3);
     }
 }
