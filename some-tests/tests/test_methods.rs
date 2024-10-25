@@ -48,7 +48,7 @@ impl Rectangle {
 }
 
 #[test]
-fn method() {
+fn method_struct() {
     let rectangle = Rectangle {
         width: 7,
         height: 6,
@@ -66,6 +66,19 @@ fn method() {
     };
     let r = rectangle.can_hold(&other);
     assert!(r);
+}
+
+#[test]
+fn method_struct_mutable() {
+    let mut rectangle = Rectangle {
+        width: 7,
+        height: 6,
+    };
+
+    rectangle.set_width(4);
+
+    let area = rectangle.area();
+    assert_eq!(area, 24);
 }
 
 #[test]
