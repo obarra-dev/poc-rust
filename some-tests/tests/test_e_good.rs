@@ -13,13 +13,6 @@ impl Shape for Rectangle {
     }
 }
 
-// the struct can have other methods different from the trait
-impl Rectangle {
-    fn can_hold(&self, other: &Rectangle) -> bool {
-        self.width > other.width && self.height > other.height
-    }
-}
-
 struct Triangle {
     base: i32,
     height: i32,
