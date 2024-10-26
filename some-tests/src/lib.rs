@@ -2,6 +2,11 @@ pub fn add(left: u64, right: u64) -> u64 {
     left + right
 }
 
+// TODO to check
+pub fn type_of<T>(_: &T) -> String {
+    format!("{}", std::any::type_name::<T>())
+}
+
 #[cfg(test)]
 mod tests {
     use core::{panic, slice};
@@ -232,11 +237,6 @@ mod tests {
         assert_eq!('o' as u8, 111);
     }
 
-    // TODO to check
-    fn type_of<T>(_: &T) -> String {
-        format!("{}", std::any::type_name::<T>())
-    }
-
     #[test]
     fn checked_add() {
         // both would overflow, they do not compile
@@ -338,12 +338,6 @@ mod tests {
         // Rather that return None, we use a divergin function instead
         // TODO check it out
         never_return();
-    }
-
-    #[test]
-    fn string_test() {
-        let a = String::from("omar");
-        assert_eq!(a, "omar");
     }
 
     #[test]
@@ -632,121 +626,6 @@ mod tests {
     }
 
     #[test]
-    fn string() {
-        // string literary, type &str
-        // string literary is a hardcode in the binary itself
-        // so the size is known at compile time
-        // string literay is also considering a string slice because it is mutable and it a reference to a static memory
-        let s = "omar";
-        assert_eq!(s, "omar");
-        let pointer = format!("{:p}", s);
-        // it retuns the address of the string
-        // question, how to check it?
-        // assert_eq!(pointer, "0x7ff64179275");
-
-        // type String
-        let s = String::from("omar barra");
-        assert_eq!(s, "omar barra");
-
-        // string slice
-        // points to a squance of characters stored on the heap
-        let x = &s[0..4];
-        let y = &s[5..10];
-        assert_eq!(x, "omar");
-        assert_eq!(y, "barra");
-
-        // we can use str only by boxed it, it has to be explicitly typed
-        // omar is converted into a Box<str>, heap allocated
-        let s: Box<str> = "omar".into();
-        // & can be used to convert Box<str> to &str, it has to be explicitly typed
-        let x: &str = &s;
-        assert_eq!(x, "omar");
-    }
-
-    #[test]
-    fn string_methods() {
-        let mut s = String::from("omar");
-        s.push_str(" barra");
-        s.push('!');
-        // this way is valid
-        s += "!";
-        assert_eq!(s, "omar barra!!");
-
-        let s = String::from("omar java");
-        // it allocate new memory and store the modified string there, it does not modify the original one
-        let x = s.replace("java", "barra");
-        assert_eq!(s, "omar java");
-        assert_eq!(x, "omar barra");
-
-        let s = String::from("omar");
-        let x = String::from("barra");
-        // as_str() convert String to string slice (&str)
-        let y = s + x.as_str();
-        assert_eq!(y, "omarbarra");
-
-        let s = String::from("omar");
-        // convert String to &str
-        let x = s.as_str();
-        assert_eq!(type_of(&x), "&str");
-        assert_eq!(type_of(&s), "alloc::string::String");
-        // question: I have to define the type explicitly, why?
-        let y: &str = &s;
-        assert_eq!(type_of(&x), type_of(&y));
-        // question: if it is implicitly defined it is &String why?
-        let z = &s;
-        assert_eq!(type_of(&z), "&alloc::string::String");
-
-        let s = "omar";
-        // convert &str to String
-        let x = s.to_string();
-        assert_eq!(type_of(&x), "alloc::string::String");
-        assert_eq!(type_of(&s), "&str");
-        let y = String::from(s);
-        assert_eq!(type_of(&x), type_of(&y));
-        let z = s.to_owned();
-        assert_eq!(type_of(&x), type_of(&z));
-
-        // concat
-        let s = String::from("omar");
-        let x = String::from("barra");
-        // concat a String with &str, we cannot concat a String with a String
-        // & convert String to string slice (&str)
-        let y = s + &x;
-        assert_eq!(y, "omarbarra");
-        // does not compile, as the ownership of s was moved
-        // assert_eq!(s, "omar");
-
-        // \ is for scape characters
-        let s = "this is Ru\x73\x74";
-        assert_eq!(s, "this is Rust");
-
-        // lenght
-        let s = String::from("omar");
-        assert_eq!(s.len(), 4);
-        let s = String::from("读写汉字 - 学中文");
-        // lenght is not the number of characters, it is the number of bytes
-        assert_eq!(s.len(), 24);
-
-        // s[0] is not allowed, it is not a valid index
-        // you have to use string slice &s[from..to]
-        let s = String::from("omar 中文");
-        let o = &s[0..1];
-        assert_eq!(o, "o");
-        // 3 bytes for 中
-        let chinise_letter = &s[5..8];
-        assert_eq!(chinise_letter, "中");
-
-        // operations on UTF8
-        let iter_chars = "学中文".chars();
-        let mut s = String::new();
-        for c in iter_chars {
-            s.push(c);
-            s.push(c);
-        }
-        assert_eq!(s, "学学中中文文");
-    }
-
-    #[test]
     fn array() {
         // infers the type is [i32; 3]
         let arr = [1, 2, 3];
@@ -832,96 +711,6 @@ mod tests {
 
         // TODO example with string slice
         // https://doc.rust-lang.org/std/string/struct.String.html#method.clear
-    }
-
-    #[derive(Debug)]
-    struct User {
-        name: String,
-        email: String,
-        age: u8,
-        active: bool,
-    }
-
-    #[test]
-    fn struct_test() {
-        let user = User {
-            name: String::from("omar"),
-            email: String::from("obarr@test.com"),
-            active: true,
-            age: 4,
-        };
-        assert_eq!(user.name, "omar");
-        // does not compile, as the struct is not mutable
-        //  user.age = 5;
-
-        // mut is to make the struct mutable
-        // Rust does not allow to mark only one field as mutable
-        let mut user = User {
-            name: String::from("omar"),
-            email: String::from("obarr@test.com"),
-            active: true,
-            age: 4,
-        };
-        user.email = String::from("omar@test.com");
-        assert_eq!(user.email, "omar@test.com");
-
-        // function can instantiate and return a struct
-        fn build_user(name: String, email: String) -> User {
-            // using the field init shorthand syntax to reduce repetition
-            User {
-                name,
-                email,
-                active: true,
-                age: 4,
-            }
-        }
-        let user = build_user(String::from("omar"), String::from("obarra@test.com"));
-        assert_eq!(user.email, "obarra@test.com");
-
-        // struct update syntax
-        let other_user = User {
-            email: String::from("test@test.com"),
-            ..user
-        };
-        assert_eq!(other_user.email, "test@test.com");
-
-        //println!("the person struct is: {:?}", p);
-
-        let user = build_user(String::from("omar"), String::from("obarra@test.com"));
-        // to print or format a struct, it has to implement the Debug trait
-        let s = format!("{:?}", user);
-        assert_eq!(
-            s,
-            "User { name: \"omar\", email: \"obarra@test.com\", age: 4, active: true }"
-        );
-
-        // Print debug information to stderr
-        dbg!(user);
-
-        // partial move
-        let user = build_user(String::from("omar"), String::from("obarra@test.com"));
-        // name is moved out of user, so you can not use user.name and user, but you can use user.email
-        let name = user.name;
-        assert_eq!(name, "omar");
-        assert_eq!(user.email, "obarra@test.com");
-        // does not compile, as user is partial moved
-        // assert_eq!(user.name, "omar");
-        // print!("{:?}", user);
-    }
-
-    struct Color(u8, u8, u8);
-
-    #[test]
-    fn tuple_struct() {
-        let color = Color(255, 0, 0);
-        assert_eq!(color.0, 255);
-    }
-
-    #[test]
-    fn unit_like_structs() {
-        struct UnitLikeStruct;
-        let _unit_like_struct = UnitLikeStruct;
-        // TODO
     }
 
     #[test]

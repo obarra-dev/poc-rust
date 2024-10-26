@@ -38,6 +38,7 @@ enum Thing {
 }
 
 struct Holder {
+    // using enum the compilar as an expectation of the size
     things: Vec<Thing>,
 }
 
