@@ -62,6 +62,21 @@ fn trait_test() {
     // the static dispatch is used here, it generates the method area for triangle
     let area = triangle.area();
     assert_eq!(area, 6);
+
+    trait Draw {
+        fn draw(&self) -> String;
+    }
+
+    // a trait can be implemented for a standard type
+    impl Draw for u8 {
+        fn draw(&self) -> String {
+            // *self is automatically dereferenced
+            format!("Drawing a number: {}", self)
+        }
+    }
+    let number: u8 = 4;
+    let drawing = number.draw();
+    assert_eq!(drawing, "Drawing a number: 4");
 }
 
 #[test]
@@ -173,6 +188,20 @@ fn trait_objects_dynamic() {
     // the dynamic dispatch is used here
     let rectangle = return_shape(true);
     assert_eq!(rectangle.area(), 42);
+
+    // othe example
+    let shape: [&dyn Shape; 2] = [
+        &Rectangle {
+            width: 7,
+            height: 6,
+        },
+        &Triangle { base: 4, height: 3 },
+    ];
+
+    for s in shape.iter() {
+        let area = s.area();
+        assert!(area == 42 || area == 6);
+    }
 }
 
 #[test]
@@ -272,7 +301,7 @@ fn trait_automatic_impl_derive() {
 }
 
 #[test]
-fn trait_operator() {
+fn trait_overload_operator() {
     // in rust many operators can be overloaded via traits
 
     // T has to implement the Mul trait
@@ -345,4 +374,129 @@ fn trait_example_generic_implemeting_traits_from_lib() {
     let pair = Pair::new(Unit(4), Unit(3));
     let message = pair.get_message();
     assert_eq!(message, "Unit(4) is bigger than Unit(3)");
+}
+
+#[test]
+fn trait_associated_type() {
+    // this trait has an associated type, and returns it
+    trait MyTrait {
+        type MyType;
+        fn my_method(&self) -> Self::MyType;
+    }
+
+    struct MyStruct;
+    // here we have to assign the associated type to a concrete type
+    impl MyTrait for MyStruct {
+        type MyType = i32;
+        fn my_method(&self) -> Self::MyType {
+            44
+        }
+    }
+
+    let my_struct = MyStruct;
+    let my_type = my_struct.my_method();
+    assert_eq!(my_type, 44);
+}
+
+#[test]
+fn static_vs_dynamic_dispatcher() {
+    trait Foo {
+        fn method(&self) -> String;
+    }
+
+    impl Foo for u8 {
+        fn method(&self) -> String {
+            format!("u8: {}", self)
+        }
+    }
+
+    impl Foo for String {
+        fn method(&self) -> String {
+            format!("String: {}", self)
+        }
+    }
+
+    // create a funtion for a concrete type
+    // static dispatch is faster than dynamic dispatch because we know the type at compile time and it does not need to look up the method at vtable
+    fn static_dispatch<T: Foo>(a: T) -> String {
+        a.method()
+    }
+
+    // look up in the vtable at runtime and determine the method to call
+    fn dynamic_dispatch(a: &dyn Foo) -> String {
+        a.method()
+    }
+
+    let u = 4;
+    assert_eq!(static_dispatch(u), "u8: 4");
+    assert_eq!(dynamic_dispatch(&u), "u8: 4");
+
+    let s = "omar".to_string();
+    assert_eq!(static_dispatch(s.clone()), "String: omar");
+    assert_eq!(dynamic_dispatch(&s), "String: omar");
+}
+
+#[test]
+fn object_safe() {
+    // it is object safe because the retun type is not Self
+    // and  the method does not have any generic type
+    trait Foo {
+        fn method(&self) -> Box<dyn Foo>;
+    }
+
+    impl Foo for u8 {
+        fn method(&self) -> Box<dyn Foo> {
+            Box::new(*self + 1)
+        }
+    }
+
+    impl Foo for String {
+        fn method(&self) -> Box<dyn Foo> {
+            let mut s = String::from("barra");
+            let c = self.clone();
+            s.push_str(&c);
+            Box::new(s)
+        }
+    }
+
+    fn dynamic_dispatch(a: Box<dyn Foo>) -> Box<dyn Foo> {
+        a.method()
+    }
+
+    let f = dynamic_dispatch(Box::new("omar".to_string()));
+
+    // TODO question: how to get the value from the Box<dyn Foo>?
+    let f = dynamic_dispatch(Box::new(4_u8));
+}
+
+#[test]
+fn no_object_safe() {
+    trait Foo {
+        fn method(&self) -> Self;
+    }
+
+    impl Foo for u8 {
+        fn method(&self) -> Self {
+            *self + 1
+        }
+    }
+
+    impl Foo for String {
+        fn method(&self) -> Self {
+            let mut s = String::from("barra");
+            let c = self.clone();
+            s.push_str(&c);
+            s
+        }
+    }
+
+    fn static_dispatch<T: Foo>(a: T) -> T {
+        a.method()
+    }
+
+    let f = static_dispatch("omar".to_string());
+    assert_eq!(f, "barraomar");
+
+    let f = static_dispatch(4_u8);
+    assert_eq!(f, 5);
 }
