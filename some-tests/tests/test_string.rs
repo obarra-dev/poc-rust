@@ -57,51 +57,9 @@ fn string_methods() {
     assert_eq!(s, "omar java");
     assert_eq!(x, "omar barra");
 
-    // concat
-    let s = String::from("omar");
-    let x = String::from("barra");
-    // concat a String with &str, we cannot concat a String with a String
-    // & convert String to string slice (&str)
-    let y = s + &x;
-    assert_eq!(y, "omarbarra");
-    // does not compile, as the ownership of s was moved
-    // assert_eq!(s, "omar");
-
     // \ is for scape characters
     let s = "this is Ru\x73\x74";
     assert_eq!(s, "this is Rust");
-
-    // lenght
-    let s = String::from("omar");
-    assert_eq!(s.len(), 4);
-    let s = String::from("读写汉字 - 学中文");
-    // lenght is not the number of characters, it is the number of bytes
-    assert_eq!(s.len(), 24);
-
-    // s[0] is not allowed, it is not a valid index
-    // you have to use string slice &s[from..to]
-    let s = String::from("omar 中文");
-    let o = &s[0..1];
-    assert_eq!(o, "o");
-    // 3 bytes for 中
-    let chinise_letter = &s[5..8];
-    assert_eq!(chinise_letter, "中");
-
-    // operations on UTF8
-    let iter_chars = "学中文".chars();
-    let mut s = String::new();
-    for c in iter_chars {
-        s.push(c);
-        s.push(c);
-    }
-    assert_eq!(s, "学学中中文文");
-
-    let s = "hello, 学中文";
-    for (i, c) in s.chars().enumerate() {
-        if i == 7 {
-            assert_eq!(c, '学');
-        }
-    }
 }
 
 #[test]
@@ -155,13 +113,6 @@ fn string_to_string_slice() {
 
     let x = &s[..2];
     assert_eq!(x, "om");
-
-    // concat
-    let s = String::from("omar");
-    let x = String::from("barra");
-    // TODO why it works?
-    let y = s + x.as_str();
-    assert_eq!(y, "omarbarra");
 }
 
 #[test]
@@ -179,6 +130,20 @@ fn slice_string_to_string() {
 
     let z = s.to_owned();
     assert_eq!(type_of(&x), type_of(&z));
+}
+
+#[test]
+fn concat() {
+    // TODO why it works?
+    // concat
+    let s = String::from("omar");
+    let x = String::from("barra");
+    // concat a String with &str, we cannot concat a String with a String
+    // & convert String to string slice (&str)
+    let y = s + &x;
+    assert_eq!(y, "omarbarra");
+    // does not compile, as the ownership of s was moved
+    // assert_eq!(s, "omar");
 }
 
 #[test]
@@ -212,5 +177,39 @@ fn capacity_and_len() {
         s.push_str("omar");
         assert_eq!(s.len(), 4 * (i + 1));
         assert_eq!(s.capacity(), 16);
+    }
+}
+
+#[test]
+fn lenght_is_number_of_bytes() {
+    let s = String::from("omar");
+    assert_eq!(s.len(), 4);
+    let s = String::from("读写汉字 - 学中文");
+    // lenght is not the number of characters, it is the number of bytes
+    assert_eq!(s.len(), 24);
+
+    // s[0] is not allowed, it is not a valid index
+    // you have to use string slice &s[from..to]
+    let s = String::from("omar 中文");
+    let o = &s[0..1];
+    assert_eq!(o, "o");
+    // 3 bytes for 中
+    let chinise_letter = &s[5..8];
+    assert_eq!(chinise_letter, "中");
+
+    // operations on UTF8
+    let iter_chars = "学中文".chars();
+    let mut s = String::new();
+    for c in iter_chars {
+        s.push(c);
+        s.push(c);
+    }
+    assert_eq!(s, "学学中中文文");
+
+    let s = "hello, 学中文";
+    for (i, c) in s.chars().enumerate() {
+        if i == 7 {
+            assert_eq!(c, '学');
+        }
     }
 }
