@@ -1,3 +1,5 @@
+use std::vec;
+
 use some_tests::type_of;
 
 #[test]
@@ -40,7 +42,9 @@ fn string() {
 
 #[test]
 fn string_methods() {
+    // allocate memory on the heap
     let mut s = String::from("omar");
+    // push_str() takes a string slice
     s.push_str(" barra");
     s.push('!');
     // this way is valid
@@ -52,34 +56,6 @@ fn string_methods() {
     let x = s.replace("java", "barra");
     assert_eq!(s, "omar java");
     assert_eq!(x, "omar barra");
-
-    let s = String::from("omar");
-    let x = String::from("barra");
-    // as_str() convert String to string slice (&str)
-    let y = s + x.as_str();
-    assert_eq!(y, "omarbarra");
-
-    let s = String::from("omar");
-    // convert String to &str
-    let x = s.as_str();
-    assert_eq!(type_of(&x), "&str");
-    assert_eq!(type_of(&s), "alloc::string::String");
-    // question: I have to define the type explicitly, why?
-    let y: &str = &s;
-    assert_eq!(type_of(&x), type_of(&y));
-    // question: if it is implicitly defined it is &String why?
-    let z = &s;
-    assert_eq!(type_of(&z), "&alloc::string::String");
-
-    let s = "omar";
-    // convert &str to String
-    let x = s.to_string();
-    assert_eq!(type_of(&x), "alloc::string::String");
-    assert_eq!(type_of(&s), "&str");
-    let y = String::from(s);
-    assert_eq!(type_of(&x), type_of(&y));
-    let z = s.to_owned();
-    assert_eq!(type_of(&x), type_of(&z));
 
     // concat
     let s = String::from("omar");
@@ -119,4 +95,122 @@ fn string_methods() {
         s.push(c);
     }
     assert_eq!(s, "学学中中文文");
+
+    let s = "hello, 学中文";
+    for (i, c) in s.chars().enumerate() {
+        if i == 7 {
+            assert_eq!(c, '学');
+        }
+    }
+}
+
+#[test]
+fn string_move_owneship() {
+    let s = String::from("omar");
+    let mut new_s = s;
+    new_s.push_str(" barra");
+    assert_eq!(new_s, "omar barra");
+
+    // does not compile, as the ownership of s was moved
+    // assert_eq!(s, "omar");
+}
+
+#[test]
+fn string_clone_to_not_move_owneship() {
+    fn move_owneship(s: String) -> String {
+        let mut new_s = String::from("barra");
+        new_s.push_str(&s);
+        new_s
+    }
+
+    let s = String::from("omar");
+    // we can use clone to avoid moving the ownership
+    let x = move_owneship(s.clone());
+    assert_eq!(x, "barraomar");
+    assert_eq!(s, "omar");
+}
+
+#[test]
+fn string_to_string_slice() {
+    let s = String::from("omar");
+    assert_eq!(type_of(&s), "alloc::string::String");
+
+    // first way to convert String to string slice (&str), using &s[..]
+    let x = &s[..];
+    assert_eq!(x, "omar");
+    assert_eq!(type_of(&x), "&str");
+
+    // second way to convert String to string slice (&str), using as_str()
+    let x = s.as_str();
+    assert_eq!(x, "omar");
+    assert_eq!(type_of(&x), "&str");
+
+    // third way to convert String to string slice (&str), using &s
+    // TODO question: I have to define the type explicitly, why?
+    let y: &str = &s;
+    assert_eq!(type_of(&x), type_of(&y));
+    // TODO question: if it is implicitly defined it is &String why?
+    let z = &s;
+    assert_eq!(type_of(&z), "&alloc::string::String");
+
+    let x = &s[..2];
+    assert_eq!(x, "om");
+
+    // concat
+    let s = String::from("omar");
+    let x = String::from("barra");
+    // TODO why it works?
+    let y = s + x.as_str();
+    assert_eq!(y, "omarbarra");
+}
+
+#[test]
+fn slice_string_to_string() {
+    let s = "omar";
+    assert_eq!(type_of(&s), "&str");
+
+    // convert &str to String
+    // to_string() allocates memory on the heap
+    let x = s.to_string();
+    assert_eq!(type_of(&x), "alloc::string::String");
+
+    let y = String::from(s);
+    assert_eq!(type_of(&x), type_of(&y));
+
+    let z = s.to_owned();
+    assert_eq!(type_of(&x), type_of(&z));
+}
+
+#[test]
+fn string_utf8() {
+    // TODO is a native funtio?
+    // let s = "hello, 中文 ";
+    // let ds = utf8_slice::slice(s, 7, 8);
+
+    let v = vec![111, 109, 97, 114];
+    let s = String::from_utf8(v).unwrap();
+    assert_eq!(s, "omar");
+}
+
+#[test]
+fn capacity_and_len() {
+    let mut s = String::new();
+    assert_eq!(s.capacity(), 0);
+    assert_eq!(s.len(), 0);
+
+    // by default the capacity has its own formula
+    for i in 0..2 {
+        s.push_str("omar");
+        assert_eq!(s.len(), 4 * (i + 1));
+        assert!(s.capacity() == 8 || s.capacity() == 16);
+    }
+
+    let mut s = String::with_capacity(16);
+    assert_eq!(s.capacity(), 16);
+    assert_eq!(s.len(), 0);
+    for i in 0..2 {
+        s.push_str("omar");
+        assert_eq!(s.len(), 4 * (i + 1));
+        assert_eq!(s.capacity(), 16);
+    }
 }
