@@ -43,6 +43,7 @@ fn string() {
 #[test]
 fn string_methods() {
     // allocate memory on the heap
+    // String is just a Vec<u8> with some methods
     let mut s = String::from("omar");
     // push_str() takes a string slice
     s.push_str(" barra");
