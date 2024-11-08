@@ -29,7 +29,7 @@ fn devide_0_cause_panic() {
 
 #[test]
 #[should_panic(expected = "attempt to multiply with overflow")]
-fn d_cause_panic() {
+fn overflow_cause_panic() {
     fn dosome(x: u8) -> f64 {
         let y: u8 = 221;
         (x * y) as f64 // 2 * 221 = 442
