@@ -21,7 +21,7 @@ mod tests {
     }
 
     #[test]
-    fn virables() {
+    fn variables() {
         // it is immutalbe, so cannot assign twice to immutable variable
         let x = 4;
         assert_eq!(x, 4);
