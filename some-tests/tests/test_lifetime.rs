@@ -191,7 +191,7 @@ fn lifetime_annotation_in_fn_same_annotation_dif_types() {
 }
 
 #[test]
-fn lifetime_annotation_in_methods() {
+fn lifetime_annotation_in_method() {
     struct Owner(i32);
 
     impl Owner {
@@ -214,7 +214,7 @@ fn lifetime_annotation_in_methods() {
 }
 
 #[test]
-fn lifetime_annotation_in_methodsss() {
+fn lifetime_annotation_in_method_struct_with_ref() {
     struct Foo<'a> {
         part: &'a str,
     }
