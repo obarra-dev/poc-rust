@@ -2,7 +2,7 @@ use postgres::{ Client, NoTls};
 use postgres::Error as PostgresError;
 use std::net::{TcpListener, TcpStream};
 use std::io::{ Read, Write};
-use std::env;
+use std::string::ToString;
 use serde::de::Error;
 use serde_derive::{Deserialize, Serialize};
 
@@ -12,10 +12,11 @@ struct User {
     name: String,
     email: String,
 }
+
 // TODO how to use env?
 //const DB_URL: &str = env!("DATABASE_URL");
+
 const DB_URL: &str = "postgres://postgres:password@localhost:5432/for-rust";
-//const DB_URL: &str = "host=localhost user=postgres password=password";
 const OK_RESPONSE: &str = "HTTP/1.1 200 OK";
 const NOT_FOUND_RESPONSE: &str = "HTTP/1.1 404 NOT FOUND";
 const INTERNAL_SERVER_RESPONSE: &str = "HTTP/1.1 500 Internal Server Error";
@@ -27,9 +28,7 @@ fn main() {
         return;
     }
 
-    //let listener = TcpListener::bind("127.0.0.1:8080").unwrap();
-    // TODO why format? why 00000?
-    let listener = TcpListener::bind(format!("0.0.0.0:8080")).unwrap();
+    let listener = TcpListener::bind("0.0.0.0:8080").unwrap();
 
     for stream in listener.incoming() {
         match stream {
