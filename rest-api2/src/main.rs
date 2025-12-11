@@ -4,11 +4,7 @@ use std::net::{TcpListener, TcpStream};
 use std::io::{ Read, Write};
 use std::env;
 use serde::de::Error;
-// TODO if i use macro use it is unecessary why?
-// use serde_derive::{Deserialize, Serialize};
-
-#[macro_use]
-extern crate serde_derive;
+use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 struct User {
