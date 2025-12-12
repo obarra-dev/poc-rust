@@ -82,19 +82,20 @@ fn ownership_change_mutability() {
 }
 
 #[test]
-fn ownership_derefering() {
-    // Box allows to store data on the heap
-    let mut v = Box::new(4);
-
-    // derefering
-    *v = 44;
-    assert_eq!(*v, 44);
-
+fn ownership_dereferencing() {
     let v = 4;
     // x is a reference to v
     let x = &v;
-    // derefering x to get the value of v
+    // dereferencing x to get the value of v
     assert_eq!(*x, 4);
+
+    // Box allows to store data on the heap
+    let mut v = Box::new(4);
+    assert_eq!(*v, 4);
+
+    // dereferencing
+    *v = 44;
+    assert_eq!(*v, 44);
 }
 
 #[derive(Debug)]
