@@ -1,4 +1,4 @@
-use some_tests::type_of;
+use some_tests::{get_address_i32, type_of};
 use std::{i32, ops::RangeInclusive};
 
 
@@ -259,7 +259,7 @@ fn get_option(a: u8) -> Option<i32> {
 fn get_address_test() {
     let v = 4;
     println!("{:p}", &v);
-    let addr = format!("{:p}", &v);
+    let addr = get_address_i32(&v);
     println!("{}", addr);
     // question: how to test it is valid addres or it is the same address?
 }

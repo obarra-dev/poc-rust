@@ -10,6 +10,10 @@ pub fn get_address(s: &String) -> String {
     format!("{:p}", s)
 }
 
+pub fn get_address_i32(s: &i32) -> String {
+    format!("{:p}", s)
+}
+
 pub fn add(left: u64, right: u64) -> u64 {
     left + right
 }
