@@ -143,13 +143,29 @@ fn borrowing_reference_rule_2() {
 #[test]
 fn borrowing_reference_using_ref() {
     let s = String::from("omar");
+    // TODO why &String?
     let x = &s;
-    // ref is similar to &, but there are some minior differences in pattern matching
-    let ref y = s;
     assert_eq!(x, "omar");
+    assert_eq!(type_of(&x), "&alloc::string::String");
+
+    // ref is similar to &, but there are some minor differences in pattern matching
+    let ref y = s;
     assert_eq!(y, "omar");
     assert_eq!(y, x);
+    assert_eq!(type_of(&y), "&alloc::string::String");
+
     // both hold the same memory address
     // TODO if I use generic in get_address this assert fails why?
     assert_eq!(get_address(&x), get_address(&y));
+}
+
+#[test]
+fn reference_using_as_ref() {
+    let s = String::from("omar");
+    // & does that via deref coercions. That works only for things that implement the Deref trait.
+    // TODO  why does it need explicit type &str?
+    let x:&str = s.as_ref();
+
+    assert_eq!(x, "omar");
+    assert_eq!(type_of(&x), "&str");
 }
