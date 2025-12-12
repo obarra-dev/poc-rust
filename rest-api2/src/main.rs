@@ -48,7 +48,7 @@ fn main() {
 fn set_database() -> Result<(), PostgresError> {
     // TODO how to return the error
 
-    //  TODO why symbol ?
+    // if connect has error, it returns it
     let mut client = Client::connect(DB_URL, NoTls)?;
 
     client.batch_execute(
@@ -57,6 +57,7 @@ fn set_database() -> Result<(), PostgresError> {
             name VARCHAR NOT NULL,
             email VARCHAR NOT NULL
         )")?;
+
     Ok(())
 }
 
