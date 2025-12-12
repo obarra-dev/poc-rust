@@ -13,20 +13,21 @@ fn string() {
     // string literary, type &str
     // string literary is a hardcode in the binary itself
     // so the size is known at compile time
-    // string literay is also considering a string slice because it is mutable and it a reference to a static memory
+    // string literary is also considering a string slice because it is Immutable (a read-only view) and it a reference to a static memory
+    // Can point to data anywhere (stack, heap, or static memory).
     let s = "omar";
     assert_eq!(s, "omar");
     let pointer = format!("{:p}", s);
-    // it retuns the address of the string
+    // it returns the address of the string
     // question, how to check it?
     // assert_eq!(pointer, "0x7ff64179275");
 
-    // type String
+    // type String is  heap allocated, ::from to convert string literary to String
     let s = String::from("omar barra");
     assert_eq!(s, "omar barra");
 
     // string slice
-    // points to a squance of characters stored on the heap
+    // points to a sequence of characters stored on the heap
     let x = &s[0..4];
     let y = &s[5..10];
     assert_eq!(x, "omar");
@@ -64,7 +65,7 @@ fn string_methods() {
 }
 
 #[test]
-fn string_move_owneship() {
+fn string_move_ownership() {
     let s = String::from("omar");
     let mut new_s = s;
     new_s.push_str(" barra");
@@ -75,8 +76,8 @@ fn string_move_owneship() {
 }
 
 #[test]
-fn string_clone_to_not_move_owneship() {
-    fn move_owneship(s: String) -> String {
+fn string_clone_to_not_move_ownership() {
+    fn move_ownership(s: String) -> String {
         let mut new_s = String::from("barra");
         new_s.push_str(&s);
         new_s
@@ -84,7 +85,7 @@ fn string_clone_to_not_move_owneship() {
 
     let s = String::from("omar");
     // we can use clone to avoid moving the ownership
-    let x = move_owneship(s.clone());
+    let x = move_ownership(s.clone());
     assert_eq!(x, "barraomar");
     assert_eq!(s, "omar");
 }
@@ -122,13 +123,14 @@ fn slice_string_to_string() {
     assert_eq!(type_of(&s), "&str");
 
     // convert &str to String
-    // to_string() allocates memory on the heap
+    // to_string() allocates memory on the heap, it is more readable
     let x = s.to_string();
     assert_eq!(type_of(&x), "alloc::string::String");
 
     let y = String::from(s);
     assert_eq!(type_of(&x), type_of(&y));
 
+    // not only for string, Often used to convert any borrowed type (&T) into its owned counterpart (T)
     let z = s.to_owned();
     assert_eq!(type_of(&x), type_of(&z));
 }
@@ -182,11 +184,11 @@ fn capacity_and_len() {
 }
 
 #[test]
-fn lenght_is_number_of_bytes() {
+fn length_is_number_of_bytes() {
     let s = String::from("omar");
     assert_eq!(s.len(), 4);
     let s = String::from("读写汉字 - 学中文");
-    // lenght is not the number of characters, it is the number of bytes
+    // length is not the number of characters, it is the number of bytes
     assert_eq!(s.len(), 24);
 
     // s[0] is not allowed, it is not a valid index
