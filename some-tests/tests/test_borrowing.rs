@@ -1,9 +1,44 @@
+use some_tests::{get_address, type_of};
+
+#[test]
+fn immutable_borrowed() {
+    let count = 0;
+    // count can be borrowed as immutable many times
+    let borrow = &count;
+    let reborrow = &count;
+
+    assert_eq!(*borrow, 0);
+    assert_eq!(*reborrow, 0);
+    assert_eq!(count, 0);
+    assert_eq!(type_of(&count), "i32");
+    assert_eq!(type_of(&borrow), "&i32");
+    assert_eq!(type_of(&reborrow), "&i32");
+}
+
+#[test]
+fn mutable_borrowed() {
+    let mut count = 0;
+    let mutable_borrow = &mut count;
+    // it does not compile since count can be borrowed as mutable only once
+    // let remutable_borrow = &mut count;
+
+    // it does not compile, count can not be borrowed as mutable and then as immutable at the same time
+    //let reborrow = &count;
+    assert_eq!(*mutable_borrow, 0);
+    assert_eq!(type_of(&mutable_borrow), "&mut i32");
+
+    // since it is a mutable reference
+    *mutable_borrow = 4;
+    assert_eq!(*mutable_borrow, 4);
+    assert_eq!(count, 4);
+}
 
 #[test]
 fn borrowing() {
-    // inmutable reference
+    // s is an owned string, it is allocated on the heap
     let s = String::from("omar");
-    // & is to pass the inmutable reference, ownership is not transferred, it is borrowed
+    // & is to pass the immutable reference
+    // ownership is not transferred, it is borrowed
     // I can have any number of immutable references from the same variable
     // x and z are read only
     let x = &s;
@@ -22,8 +57,9 @@ fn borrowing() {
 
 #[test]
 fn borrowing_mutable_reference() {
-    // mutable reference
+    // s is a mutable variable of type String
     let mut s = String::from("omar");
+    // x is a mutable reference to s
     let x = &mut s;
     x.push_str(" barra");
     assert_eq!(x, "omar barra");
@@ -81,6 +117,10 @@ fn borrowing_mutable_and_immutable_reference() {
     let z = &mut s;
     z.push_str(" barra");
     assert_eq!(z, "omar barra");
+
+    // this will cause the mutatable reference z does not compile, as x and y were used before
+    // assert_eq!(x, "omar");
+    // assert_eq!(y, "omar");
 }
 
 #[test]
@@ -111,9 +151,4 @@ fn borrowing_reference_using_ref() {
     assert_eq!(y, x);
     // both hold the same memory address
     assert_eq!(get_address(&x), get_address(&y));
-}
-
-fn get_address(s: &String) -> String {
-    // it returns the address of the string
-    format!("{:p}", s)
 }

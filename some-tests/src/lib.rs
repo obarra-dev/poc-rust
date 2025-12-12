@@ -5,6 +5,11 @@ pub fn type_of<T>(_: &T) -> String {
     format!("{}", std::any::type_name::<T>())
 }
 
+pub fn get_address(s: &String) -> String {
+    // it returns the address of the string
+    format!("{:p}", s)
+}
+
 pub fn add(left: u64, right: u64) -> u64 {
     left + right
 }
