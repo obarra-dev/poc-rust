@@ -1,3 +1,4 @@
+use some_tests::type_of;
 
 #[test]
 fn ownership() {
@@ -93,7 +94,7 @@ fn ownership_dereferencing() {
     let mut v = Box::new(4);
     assert_eq!(*v, 4);
 
-    // dereferencing
+    // dereferencing v to set a new value
     *v = 44;
     assert_eq!(*v, 44);
 }
@@ -155,4 +156,34 @@ fn ownership_partial_move() {
     // t.0 is moved to _s, so it canot be used
     let _s = t.0;
     assert_eq!(t.1, "barra");
+}
+
+#[test]
+fn new_reference_from_reference() {
+    let v = 4;
+    // x is a reference to v
+    let x = &v;
+    let pointer_x = format!("{:p}", x);
+    assert_eq!(*x, 4);
+    assert_eq!(type_of(x), "i32");
+    assert_eq!(type_of(&x), "&i32");
+
+
+    // &* takes a reference to that value, so you get a new reference to the same data
+    // The "new reference" is just a new variable, not a new memory location.
+    let y = &*x;
+    let pointer_y = format!("{:p}", y);
+    println!("{}", pointer_y);
+    assert_eq!(*y, 4);
+    assert_eq!(type_of(y), "i32");
+    assert_eq!(type_of(&y), "&i32");
+    assert_eq!(type_of(y), type_of(x));
+    assert_eq!(type_of(&y), type_of(&x));
+    // y and x are two reference variables, but both point to the same location in memory
+    assert_eq!(pointer_y, pointer_x); 
+
+    // a new reference to the same data
+    let z = &*y;
+    let pointer_z = format!("{:p}", z);
+    assert_eq!(pointer_x, pointer_z); 
 }

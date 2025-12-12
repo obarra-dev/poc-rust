@@ -40,6 +40,9 @@ fn borrowing() {
     // & is to pass the immutable reference
     // ownership is not transferred, it is borrowed
     // I can have any number of immutable references from the same variable
+    // x is a reference to s, it means x is a pointer to s
+    // in other words, references and borrowing refer to the same concept:
+    // a mechanism that allows you to use a value without taking ownership of it.
     // x and z are read only
     let x = &s;
     let z = &s;
