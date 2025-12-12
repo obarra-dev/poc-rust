@@ -150,5 +150,6 @@ fn borrowing_reference_using_ref() {
     assert_eq!(y, "omar");
     assert_eq!(y, x);
     // both hold the same memory address
+    // TODO if I use generic in get_address this assert fails why?
     assert_eq!(get_address(&x), get_address(&y));
 }
