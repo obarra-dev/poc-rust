@@ -28,17 +28,17 @@ fn main() {
         return;
     }
 
-    let listener = TcpListener::bind("0.0.0.0:8080").unwrap();
+    let listener = TcpListener::bind("0.0.0.0:8088").unwrap();
 
     for stream in listener.incoming() {
         match stream {
             Ok(stream) => {
                 handle_client(stream);
-                println!("OK");
+                println!("OK incoming stream");
             }
             Err(e) => {
-                print!("Error: {}", e);
-            }
+                println!("Error incoming stream: {}", e);
+            },
         }
     }
 
@@ -101,6 +101,6 @@ fn handle_post_request(request: &str) -> (String, String) {
 
 
 fn get_user_request_body(request: &str) -> Result<User, serde_json::Error> {
-    // TODOwhy this string?
+    // TODO why this string?
     serde_json::from_str(request.split("\r\n\r\n").last().unwrap_or_default())
 }
