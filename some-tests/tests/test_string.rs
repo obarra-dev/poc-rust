@@ -158,6 +158,12 @@ fn string_utf8() {
     let v = vec![111, 109, 97, 114];
     let s = String::from_utf8(v).unwrap();
     assert_eq!(s, "omar");
+
+    let v = vec![111, 109, 97, 114];
+    // Converts a slice of bytes to a string, including invalid characters
+    // TODO why Cow?
+    let s = String::from_utf8_lossy(&v);
+    assert_eq!(s, "omar");
 }
 
 #[test]
