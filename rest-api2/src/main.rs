@@ -17,9 +17,9 @@ struct User {
 //const DB_URL: &str = env!("DATABASE_URL");
 
 const DB_URL: &str = "postgres://postgres:password@localhost:5432/for-rust";
-const OK_RESPONSE: &str = "HTTP/1.1 200 OK";
-const NOT_FOUND_RESPONSE: &str = "HTTP/1.1 404 NOT FOUND";
-const INTERNAL_SERVER_RESPONSE: &str = "HTTP/1.1 500 Internal Server Error";
+const OK_RESPONSE: &str = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n";
+const NOT_FOUND_RESPONSE: &str = "HTTP/1.1 404 NOT FOUND\r\n\r\n";
+const INTERNAL_SERVER_ERROR_RESPONSE: &str = "HTTP/1.1 500 INTERNAL SERVER ERROR\r\n\r\n";
 
 
 fn main() {
@@ -68,9 +68,12 @@ fn handle_client(mut stream: TcpStream) {
     match stream.read(&mut buffer) {
         Ok(size) => {
             // TODO what??
+            // into request concat the content of buffer
             request.push_str(&String::from_utf8_lossy(&buffer[..size]).as_ref());
 
+            // I think &*request is unnecessary, only &request works but I keep it
             let (status_line, content) = match &*request {
+                // match guard
                 r if r.starts_with("POST /users") => handle_post_request(r),
                 _ => (NOT_FOUND_RESPONSE.to_string(), "404 not found".to_string()), // TODO to_string is necessar?
             };
@@ -95,12 +98,12 @@ fn handle_post_request(request: &str) -> (String, String) {
 
             (OK_RESPONSE.to_string(), "User created".to_string())
         }
-        _ => (INTERNAL_SERVER_RESPONSE.to_string(), "Error".to_string()),
+        _ => (INTERNAL_SERVER_ERROR_RESPONSE.to_string(), "Error parsing user or getting db connection".to_string()),
     }
 }
 
-
 fn get_user_request_body(request: &str) -> Result<User, serde_json::Error> {
-    // TODO why this string?
+    // this will header and then body
+    println!("{}", request);
     serde_json::from_str(request.split("\r\n\r\n").last().unwrap_or_default())
 }
