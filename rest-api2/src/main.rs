@@ -3,7 +3,6 @@ use postgres::Error as PostgresError;
 use std::net::{TcpListener, TcpStream};
 use std::io::{ Read, Write};
 use std::string::ToString;
-use serde::de::Error;
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
@@ -20,7 +19,6 @@ const DB_URL: &str = "postgres://postgres:password@localhost:5432/for-rust";
 const OK_RESPONSE: &str = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n";
 const NOT_FOUND_RESPONSE: &str = "HTTP/1.1 404 NOT FOUND\r\n\r\n";
 const INTERNAL_SERVER_ERROR_RESPONSE: &str = "HTTP/1.1 500 INTERNAL SERVER ERROR\r\n\r\n";
-
 
 fn main() {
     if let Err(e) = set_database() {
@@ -67,7 +65,6 @@ fn handle_client(mut stream: TcpStream) {
 
     match stream.read(&mut buffer) {
         Ok(size) => {
-            // TODO what??
             // into request concat the content of buffer
             request.push_str(&String::from_utf8_lossy(&buffer[..size]).as_ref());
 
@@ -81,7 +78,7 @@ fn handle_client(mut stream: TcpStream) {
             stream.write_all(format!("{}\n{}", status_line, content).as_bytes()).unwrap();
         }
         Err(e) => {
-            println!("Failed to read from stream: {}", e);
+            println!("Failed to read from stream to buffer: {}", e);
         }, // TODO why coma?
     }
 }
