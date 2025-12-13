@@ -26,7 +26,10 @@ fn match_test() {
         _ => "neither",
     };
     assert_eq!(message, "uppercase");
+}
 
+#[test]
+fn matches_test() {
     // matches
     let alphabets = ['a', 'b', 'O', 'M', '9'];
     for &c in alphabets.iter() {
