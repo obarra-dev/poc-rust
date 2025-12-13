@@ -2,7 +2,7 @@ use postgres::{ Client, NoTls};
 use std::net::{TcpListener, TcpStream};
 use std::io::{ Read, Write};
 use std::string::ToString;
-use serde_derive::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
 // TODO how derive works?
 #[derive(Serialize, Deserialize)]
