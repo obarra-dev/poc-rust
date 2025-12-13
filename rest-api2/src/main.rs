@@ -1,9 +1,7 @@
 use postgres::{ Client, NoTls};
-use postgres::Error as PostgresError;
 use std::net::{TcpListener, TcpStream};
 use std::io::{ Read, Write};
 use std::string::ToString;
-use serde::__private228::de::IdentifierDeserializer;
 use serde_derive::{Deserialize, Serialize};
 
 // TODO how derive works?
@@ -30,7 +28,6 @@ fn main() {
     }
 
     let listener = TcpListener::bind("0.0.0.0:8088").unwrap();
-
     for stream in listener.incoming() {
         match stream {
             Ok(stream) => {
@@ -46,8 +43,8 @@ fn main() {
     println!("Omar rules!");
 }
 
-fn set_database() -> Result<(), PostgresError> {
-    // TODO how to return the error
+fn set_database() -> Result<(), postgres::Error> {
+    // TODO how to return the error only?
 
     // if connect has error, it returns it
     let mut client = Client::connect(DB_URL, NoTls)?;
