@@ -1,3 +1,4 @@
+use std::num::ParseIntError;
 use std::vec;
 
 use some_tests::type_of;
@@ -220,5 +221,20 @@ fn length_is_number_of_bytes() {
         if i == 7 {
             assert_eq!(c, '学');
         }
+    }
+}
+
+#[test]
+fn string_parse() {
+    let r =  "4".parse::<i32>();
+    match r {
+        Ok(n) => assert_eq!(n, 4),
+        Err(_) =>   panic!("parse error"),
+    }
+
+    let r =  "omar".parse::<i32>();
+    match r {
+        Ok(n) => assert_eq!(n, 4),
+        Err(e) => assert_eq!(e.to_string(), "invalid digit found in string"),
     }
 }
