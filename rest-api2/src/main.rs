@@ -100,7 +100,6 @@ fn handle_post_request(request: &str) -> (String, String) {
 }
 
 fn get_user_request_body(request: &str) -> Result<User, serde_json::Error> {
-    // this will header and then body
-    println!("{}", request);
+    // request has first header and then lastly body
     serde_json::from_str(request.split("\r\n\r\n").last().unwrap_or_default())
 }
