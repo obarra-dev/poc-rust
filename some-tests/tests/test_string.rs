@@ -1,4 +1,4 @@
-use std::vec;
+use std::{thread, vec};
 
 use some_tests::type_of;
 
@@ -8,7 +8,7 @@ fn string_test() {
     // called an owned type because it owns the underlying data and is responsible for cleaning  it up
     // This type contents pointer to heap, length and capacity
     // Use case: create or modify string data dynamically at runtime
-    // String is just a Vec<u8> with some methods
+    // String is just a Vec<u8> with some methods that make it convenient to work with Unicode text
     let s = String::from("omar");
     assert_eq!(s, "omar");
     assert_eq!(type_of(&s), "alloc::string::String");
@@ -28,11 +28,37 @@ fn string_slice_test() {
 
 #[test]
 fn string_literal_test() {
-    // string literary, type &str
-    // string literary is a hardcode in the binary itself
+    // string literal type &str is a variant of string slice (&str)
+    // string literal is a hardcode in the binary itself
     // so the size is known at compile time
-    // string literary is also considering a string slice because it is Immutable (a read-only view) and it a reference to a static memory
+    // string literal is also considering a string slice because it is Immutable (a read-only view) and it a reference to a static memory
     let s = "omar";
+    assert_eq!(s, "omar");
+    assert_eq!(type_of(&s), "&str");
+
+    // &'static str is sintactic sugar for a string slice with a 'static lifetime
+    // this guarantees that this point to a string that is valid for the entire duration of the program
+    let s: &'static str = "omar";
+    assert_eq!(s, "omar");
+    assert_eq!(type_of(&s), "&str");
+
+    // &'static is not necessary on above example
+
+    // &'static is necessary for storing string slices in struts or enums
+    enum MyError {
+        SomeError(&'static str),
+        // does not compile, as str does not have 'static lifetime
+        //SomeError2(& str),
+    }
+    let error = MyError::SomeError("an error occurred");
+    assert!(matches!(error, MyError::SomeError(_)));
+
+    fn get_static_str() -> &'static str {
+        "omar"
+    }
+
+    // &'static is necessary function that retunrs slice that does not have other borrowed parameters
+    let s = get_static_str();
     assert_eq!(s, "omar");
     assert_eq!(type_of(&s), "&str");
 }
@@ -202,10 +228,33 @@ fn scape_characters() {
 }
 
 #[test]
+fn raw_string_literal() {
+    // allows special characters like backslashes or quotes
+    // useful for regex
+    let r = r#"
+{
+    "userId": 1,
+    "id": 4,
+    "title": "omar rules",
+    "complete": false
+}"#;
+
+    assert_eq!(r, "\n{\n    \"userId\": 1,\n    \"id\": 4,\n    \"title\": \"omar rules\",\n    \"complete\": false\n}");
+
+    // byte string literal
+    // create a slice of bytes, type &[u8; N]
+    // useful for network protocols that expect data in bytes
+    let http_ok = b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n";
+    assert_eq!(type_of(&http_ok), "&[u8; 51]");
+
+    // combine raw string literal and byte string literal
+    let png_signature = br"\x89PNG\r\n\x1a\n";
+    assert_eq!(type_of(&png_signature), "&[u8; 17]");
+}
+
+#[test]
 fn string_utf8() {
-    // TODO is a native funtio?
-    // let s = "hello, 中文 ";
-    // let ds = utf8_slice::slice(s, 7, 8);
+    // String is a wrapper over Vec<u8> but Vec<u8> can be useful dealing with binary
 
     let v = vec![111, 109, 97, 114];
     let s = String::from_utf8(v).unwrap();
@@ -213,9 +262,18 @@ fn string_utf8() {
 
     let v = vec![111, 109, 97, 114];
     // Converts a slice of bytes to a string, including invalid characters
-    // TODO why Cow?
+    //  why Cow?
+    // Answer: If the byte slice &v contains only valid UTF-8, it returns a borrowed string slice (Cow::Borrowed(&str)) without allocating new memory.
+    // If the byte slice contains invalid UTF-8, it allocates a new String, replacing invalid bytes with the Unicode replacement character (�), and returns an owned string
     let s = String::from_utf8_lossy(&v);
     assert_eq!(s, "omar");
+
+    fn latin_to_string(slice: &[u8]) -> String {
+        slice.iter().map(|&b| b as char).collect()
+    }
+
+    let utf8_data = latin_to_string(&v);
+    assert_eq!(utf8_data, "omar");
 }
 
 #[test]
@@ -275,10 +333,149 @@ fn string_parse() {
 
 #[test]
 fn box_test() {
-    // we can use str only by boxed it, it has to be explicitly typed
-    // omar is converted into a Box<str>, heap allocated
-    let s: Box<str> = "omar".into();
-    // & can be used to convert Box<str> to &str, it has to be explicitly typed
-    let x: &str = &s;
+    // Box is a smart pointer
+    // Box<str> represents a owned, non-growable and heap-allocated string slice
+    // the box is into the stack and the underlaying data is in the heap
+    // so the underlaying data which is "omar" is in the heap but the box itself is in the stack
+
+    // convert String to Box<str>
+    let s = String::from("omar");
+    let b = s.into_boxed_str();
+    assert_eq!(type_of(&b), "alloc::boxed::Box<str>");
+    let f = format!("{}", b);
+    assert_eq!(f, "omar");
+    // TODO why both ways works?
+    // only &  to convert Box<str> to &str but explicitly typing
+    let x: &str = &b;
     assert_eq!(x, "omar");
+    assert_eq!(type_of(&x), "&str");
+    // &* to convert Box<str> to &str without explicitly typing
+    let x = &*b;
+    assert_eq!(x, "omar");
+    assert_eq!(type_of(&x), "&str");
+
+    // does not compile, the size cannot be known at compile time
+    // let x = *b;
+
+    // converts string slice to Box<str> explicitly typing
+    let b: Box<str> = "omar".into();
+    assert_eq!(type_of(&b), "alloc::boxed::Box<str>");
+
+    // use case: to freeze a string to prevent modifications or droping the extra capacity information
+    // when you want to return an own string that will not be modified further
+    // when you want to aggresive optimize memory usage by removing extra capacity information
+
+    // TODO  I don't have any specific use cases in mind.
+}
+
+#[test]
+fn reference_counted_test() {
+    use std::rc::Rc;
+    // Rc is a reference counted smart pointer
+    // used for shared ownership of data in single-threaded scenarios
+    // so not thread safe
+    // useful to share ownership of a immutable string slice accros multiple parts of a program without cloning the data
+    let s = String::from("omar");
+    let rc1 = Rc::new(s);
+    assert_eq!(Rc::strong_count(&rc1), 1);
+
+    let rc2 = Rc::clone(&rc1);
+    assert_eq!(Rc::strong_count(&rc1), 2);
+    assert_eq!(Rc::strong_count(&rc2), 2);
+
+    {
+        let rc3 = Rc::clone(&rc1);
+        assert_eq!(Rc::strong_count(&rc1), 3);
+        assert_eq!(Rc::strong_count(&rc3), 3);
+    } // rc3 goes out of scope here
+
+    assert_eq!(Rc::strong_count(&rc1), 2);
+    // TODO find real use case
+    // beneficial when dealing with large strings that are expensive to clone
+}
+
+#[test]
+fn stands_atomically_reference_counted_test() {
+    use std::sync::Arc;
+    // Arc is a thread-safe reference counted smart pointer
+    // used for shared ownership of data across multiple threads
+    // useful to share ownership of a immutable string slice accros multiple threads without cloning the data
+    let s = String::from("omar");
+    let arc1 = Arc::new(s);
+    assert_eq!(Arc::strong_count(&arc1), 1);
+
+    let arc2 = Arc::clone(&arc1);
+    assert_eq!(Arc::strong_count(&arc1), 2);
+    assert_eq!(Arc::strong_count(&arc2), 2);
+
+    {
+        let arc3 = Arc::clone(&arc1);
+        assert_eq!(Arc::strong_count(&arc1), 3);
+        assert_eq!(Arc::strong_count(&arc3), 3);
+    } // arc3 goes out of scope here
+
+    assert_eq!(Arc::strong_count(&arc1), 2);
+
+    // TODO find real use case
+    // beneficial when dealing with large strings that are expensive to clone
+
+    // other example with multiple threads
+    let text_string = String::from("This some text that multiple thread will read");
+    let shared_text = Arc::new(text_string);
+    let mut handles = vec![];
+    for _ in 0..4 {
+        let text_ref = Arc::clone(&shared_text);
+        let handle = thread::spawn(move || {
+            println!("{}", text_ref);
+        });
+        handles.push(handle);
+    }
+
+    for handle in handles {
+        handle.join().unwrap();
+    }
+}
+
+#[test]
+fn mutable_reference_test() {
+    // mutable reference to String
+    // modified slice are generally avoided in Rust due to the complexities and potential pitfalls associated with UTF-8 encoding
+    // you will see this low level operation in libraries or in code needs to be aggresively optimized
+    let mut s = String::from("omar");
+    {
+        let s_ref: &mut String = &mut s;
+        s_ref.push_str(" barra");
+    }
+    assert_eq!(s, "omar barra");
+
+    // TODO make a function to ensure_single_at using this
+}
+
+#[test]
+fn copy_on_write_cow_test() {
+    // cow enum cow stands for copy on write is a smart pointer
+    // useful for funtion that sometimes modifies a string and other times does not
+    // and you avoid new allocation in cases where no modification is needed
+
+    // it retunrs a Cow that either borrows the original data or owns a modified version of it
+    fn sanitize_input(input: &str) -> std::borrow::Cow<str> {
+        if input.contains("java") {
+            let sanitized = input.replace("java", "rust");
+            std::borrow::Cow::Owned(sanitized)
+        } else {
+            std::borrow::Cow::Borrowed(input)
+        }
+    }
+
+    let c = sanitize_input("omar java");
+    assert_eq!(type_of(&c), "alloc::borrow::Cow<'_, str>");
+    assert_eq!(c, "omar rust");
+}
+
+#[test]
+fn string_types_for_interoperability_test() {
+    // TODO find great examples
+    // OsString and OsStr
+    // PathBuf and Path
+    // CString and CStr
 }
