@@ -1,0 +1,1 @@
+echo "roma" | nc localhost 7878
