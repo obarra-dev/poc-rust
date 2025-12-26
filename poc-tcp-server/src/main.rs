@@ -1,4 +1,4 @@
-use std::io::{Read, Write};
+use std::io::{ErrorKind, Read, Write};
 use std::net::{TcpListener, TcpStream};
 
 fn main() {
@@ -11,7 +11,7 @@ fn main() {
     for stream in listener.incoming() {
         match stream {
             Ok(stream) => {
-                std::thread::spawn(|| handle_client(stream));
+                std::thread::spawn(|| handle_client_loop(stream));
             },
             Err(e) => {
                 // stderr
@@ -29,4 +29,43 @@ fn handle_client(mut stream: TcpStream) {
 
     let response = "Omar rules!!".as_bytes();
     stream.write(response).expect("Failed to write to stream");
+}
+
+fn handle_client_loop(mut stream: TcpStream) {
+    let peer_addr = stream
+        .peer_addr()
+        .map_or_else(|_| "Unknown".to_string(), |addr| addr.to_string());
+    println!("Peer address: {}", peer_addr);
+
+    let mut buffer = [0; 1024];
+
+    loop {
+        match stream.read(&mut buffer) {
+            Ok(bytes) => {
+                if bytes == 0 {
+                    println!("Client {} closed connection", peer_addr);
+                    break;
+                }
+
+                if let Err(e) = stream.write_all(&buffer[..bytes]) {
+                    eprintln!("Failed to write to client {}: {}", peer_addr, e);
+                    break;
+                }
+            },
+            Err(e) if e.kind() == ErrorKind::Interrupted => continue,
+            Err(e) => {
+                match e.kind() {
+                    ErrorKind::ConnectionReset => {
+                        println!("Client {} reset connection", peer_addr);
+                    },
+                    _ => {
+                        eprintln!("Read error from client {}: {}", peer_addr, e);
+                    }
+                }
+                break;
+            },
+        }
+    }
+
+    println!("Connection finished for client {}", peer_addr);
 }
