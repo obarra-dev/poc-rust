@@ -23,10 +23,7 @@ fn main() {
         })
         .parse::<Port>()
         .unwrap_or_else(|error| {
-            writeln!(
-                io::stderr(),
-                "{}: error: {}",
-                program_name,
+            writeln!(io::stderr(), "{}: error: {}", program_name,
                 format!("invalid port number: {}", error)
             );
             println!("usage: {} HOST PORT", program_name);
