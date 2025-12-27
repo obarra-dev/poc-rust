@@ -4,8 +4,6 @@ use std::net::TcpStream;
 use std::process;
 use std::thread;
 
-type Port = u16;
-
 fn main() {
     let mut args = env::args();
     let program_name = args.next().unwrap_or("test".to_string());
@@ -21,7 +19,7 @@ fn main() {
             println!("usage: {} HOST PORT", program_name);
             process::exit(-1);
         })
-        .parse::<Port>()
+        .parse::<u16>()
         .unwrap_or_else(|error| {
             writeln!(io::stderr(), "{}: error: {}", program_name,
                 format!("invalid port number: {}", error)
