@@ -4,7 +4,7 @@ use std::net::TcpStream;
 use std::process;
 use std::thread;
 
-fn omar() {
+fn main() {
     let mut args = env::args();
     let program_name = args.next().unwrap_or("test".to_string());
 
