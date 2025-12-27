@@ -1,8 +1,8 @@
 use std::env;
-use std::process;
-use std::thread;
 use std::io::{self, Read, Write};
 use std::net::TcpStream;
+use std::process;
+use std::thread;
 
 type Port = u16;
 
@@ -15,24 +15,32 @@ fn main() {
         process::exit(-1);
     });
 
-    let port = args.next().unwrap_or_else(|| {
-        println!("usage: {} HOST PORT", program_name);
-        process::exit(-1);
-    }).parse::<Port>().unwrap_or_else(|error| {
-        writeln!(io::stderr(),"{}: error: {}", program_name, format!("invalid port number: {}",error));
-        println!("usage: {} HOST PORT", program_name);
-        process::exit(-1);
-    });
-
-    let mut stream = TcpStream::connect((host.as_str(), port))
+    let port = args
+        .next()
+        .unwrap_or_else(|| {
+            println!("usage: {} HOST PORT", program_name);
+            process::exit(-1);
+        })
+        .parse::<Port>()
         .unwrap_or_else(|error| {
-            writeln!(io::stderr(),"{}: error: {}", program_name, error);
+            writeln!(
+                io::stderr(),
+                "{}: error: {}",
+                program_name,
+                format!("invalid port number: {}", error)
+            );
+            println!("usage: {} HOST PORT", program_name);
             process::exit(-1);
         });
 
-    let mut input_stream = stream.try_clone().unwrap();
+    let mut client_stream = TcpStream::connect((host.as_str(), port)).unwrap_or_else(|error| {
+        writeln!(io::stderr(), "{}: error: {}", program_name, error);
+        process::exit(-1);
+    });
 
-    let handler = thread::spawn(move || {
+    let mut input_stream = client_stream.try_clone().unwrap();
+
+    thread::spawn(move || {
         let mut client_buffer = [0u8; 1024];
 
         loop {
@@ -40,22 +48,20 @@ fn main() {
                 Ok(n) => {
                     if n == 0 {
                         process::exit(0);
-                    }
-                    else
-                    {
+                    } else {
                         io::stdout().write(&client_buffer).unwrap();
                         io::stdout().flush().unwrap();
                     }
-                },
+                }
                 Err(error) => {
-                    writeln!(io::stderr(),"{}: error: {}", program_name, error);
+                    writeln!(io::stderr(), "{}: error: {}", program_name, error);
                     process::exit(-1);
-                },
+                }
             }
         }
     });
 
-    let output_stream = &mut stream;
+    let output_stream = &mut client_stream;
     let mut user_buffer = String::new();
 
     loop {
