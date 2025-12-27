@@ -3,8 +3,7 @@ use std::net::{TcpListener, TcpStream};
 
 fn main() {
     // creating server socket
-    let listener = TcpListener::bind("127.0.0.1:7878")
-        .expect("Failed to bind to address");
+    let listener = TcpListener::bind("127.0.0.1:7878").expect("Failed to bind to address");
 
     println!("Server listening on port 7878");
     // blocking operation
@@ -12,7 +11,7 @@ fn main() {
         match stream {
             Ok(stream) => {
                 std::thread::spawn(|| handle_client_loop(stream));
-            },
+            }
             Err(e) => {
                 // stderr
                 eprintln!("Failed to establish connection: {}", e);
@@ -23,7 +22,9 @@ fn main() {
 
 fn handle_client(mut stream: TcpStream) {
     let mut buffer = [0; 1024];
-    stream.read(&mut buffer).expect("Failed to read from stream");
+    stream
+        .read(&mut buffer)
+        .expect("Failed to read from stream");
     let request = String::from_utf8_lossy(&buffer[..]);
     println!("Received request: {}", request);
 
@@ -54,19 +55,19 @@ fn handle_client_loop(mut stream: TcpStream) {
                     eprintln!("Failed to write to client {}: {}", peer_addr, e);
                     break;
                 }
-            },
+            }
             Err(e) if e.kind() == ErrorKind::Interrupted => continue,
             Err(e) => {
                 match e.kind() {
                     ErrorKind::ConnectionReset => {
                         println!("Client {} reset connection", peer_addr);
-                    },
+                    }
                     _ => {
                         eprintln!("Read error from client {}: {}", peer_addr, e);
                     }
                 }
                 break;
-            },
+            }
         }
     }
 
