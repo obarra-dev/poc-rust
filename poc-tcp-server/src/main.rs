@@ -47,6 +47,9 @@ fn handle_client_loop(mut stream: TcpStream) {
                     break;
                 }
 
+                let request = String::from_utf8_lossy(&buffer[..]);
+                println!("Received request: {}", request);
+
                 if let Err(e) = stream.write_all(&buffer[..bytes]) {
                     eprintln!("Failed to write to client {}: {}", peer_addr, e);
                     break;
