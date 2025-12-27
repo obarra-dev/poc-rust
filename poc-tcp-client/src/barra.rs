@@ -34,6 +34,7 @@ fn omar() {
         process::exit(-1);
     });
 
+    // messages from server is handled in a different thread printing in console
     let mut input_stream = client_stream.try_clone().unwrap();
     thread::spawn(move || {
         let mut client_buffer = [0u8; 1024];
@@ -55,9 +56,9 @@ fn omar() {
         }
     });
 
+    // message from console user is sent to server
     let output_stream = &mut client_stream;
     let mut user_buffer = String::new();
-
     loop {
         io::stdin().read_line(&mut user_buffer).unwrap();
 
