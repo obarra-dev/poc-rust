@@ -1,16 +1,17 @@
-use std::io::{ErrorKind, Read, Write};
+use std::io::{stdout, ErrorKind, Read, Write};
 use std::net::{TcpListener, TcpStream};
 
 fn main() {
     // creating server socket
     let listener = TcpListener::bind("127.0.0.1:7878").expect("Failed to bind to address");
-
     println!("Server listening on port 7878");
+
     // blocking operation
     for stream in listener.incoming() {
         match stream {
             Ok(stream) => {
-                std::thread::spawn(|| handle_client_loop(stream));
+               // std::thread::spawn(|| handle_client_loop(stream));
+                handle_client_while(stream).unwrap()
             }
             Err(e) => {
                 // stderr
@@ -18,6 +19,21 @@ fn main() {
             }
         }
     }
+}
+
+fn handle_client_while(mut stream: TcpStream) -> Result<(), String> {
+    let mut buffer = [0; 1024];
+    let mut read_bytes = 0;
+
+    while read_bytes == 0 {
+        read_bytes = stream.read(&mut buffer).map_err(|_| "failed to read from socket")?;
+        println!("Read {} bytes", read_bytes);
+    }
+
+    stdout().write(&buffer[0..read_bytes]).map_err(|_| "failed to write to stdout")?;
+    stdout().flush().map_err(|_| "failed to flush from stdout")?;
+
+    Ok(())
 }
 
 fn handle_client(mut stream: TcpStream) {
