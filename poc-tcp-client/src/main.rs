@@ -30,16 +30,15 @@ fn main() {
             process::exit(-1);
         });
 
-    let mut client_stream = TcpStream::connect((host.as_str(), port)).unwrap_or_else(|error| {
+    let mut client_stream = TcpStream::connect((host.as_str(), port))
+        .unwrap_or_else(|error| {
         writeln!(io::stderr(), "{}: error: {}", program_name, error);
         process::exit(-1);
     });
 
     let mut input_stream = client_stream.try_clone().unwrap();
-
     thread::spawn(move || {
         let mut client_buffer = [0u8; 1024];
-
         loop {
             match input_stream.read(&mut client_buffer) {
                 Ok(n) => {
