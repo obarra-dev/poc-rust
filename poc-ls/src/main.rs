@@ -17,7 +17,7 @@ enum EntryType {
     Directory,
 }
 
-#[derive(Debug, Tabled)]
+#[derive(Debug)]
 struct FileEntry {
     name : String,
     e_type : EntryType,
