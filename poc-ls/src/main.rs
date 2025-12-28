@@ -22,8 +22,11 @@ enum EntryType {
 
 #[derive(Debug, Tabled)]
 struct FileEntry {
+    #[tabled(rename = "Name")]
     name : String,
+    #[tabled(rename = "Type")]
     e_type : EntryType,
+    #[tabled(rename = "Size B")]
     len_byte: u64,
     modified: String,
 }
