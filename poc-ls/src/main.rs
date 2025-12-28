@@ -37,39 +37,25 @@ struct FileEntry {
 
 fn main() {
     let cli = CLI::parse();
-    // TODO the or is executed anyway? like java
-    let path = cli.path.unwrap_or(PathBuf::from("."));
-    if let Ok(exist) = fs::exists(&path) {
-        if !exist {
+    // lazy evaluation, unwrap_or is not
+    let path = cli.path.unwrap_or_else(|| PathBuf::from("."));
+    match fs::exists(&path) {
+        Ok(true) => {
+            println!("{} exists", path.display());
+            let files = get_files(&path);
+            if cli.json {
+                print_as_json(files);
+            } else {
+                print_as_table(files);
+            }
+        }
+        Ok(false) => {
             eprintln!("{}", "Path does not exist.".red());
             // TODO 1 -1?/
             std::process::exit(1);
         }
-
-        println!("{} exists", path.display());
-        let files = get_files(&path);
-        if cli.json {
-            print_as_json(files);
-        } else {
-            print_as_table(files);
-        }
-    } else {
-        eprintln!("{}", "Error reading path.".red());
+        Err(_) => eprintln!("{}", "Error reading path.".red()),
     }
-}
-
-fn print_as_json(files: Vec<FileEntry>) {
-    let file_json = serde_json::to_string(&files).unwrap_or("Cannot parse json".to_string());
-    println!("{}", file_json);
-}
-
-fn print_as_table(files: Vec<FileEntry>) {
-    let mut table = Table::new(files);
-    table.with(Style::rounded());
-    table.modify(Columns::first(), Color::FG_RED);
-    table.modify(Columns::one(3), Color::FG_BRIGHT_MAGENTA);
-    table.modify(Rows::first(), Color::FG_BRIGHT_GREEN);
-    println!("{}", table);
 }
 
 fn get_files(path: &Path) -> Vec<FileEntry> {
@@ -107,4 +93,18 @@ fn add_file(file_entry: DirEntry, files: &mut Vec<FileEntry>) {
             },
         })
     }
+}
+
+fn print_as_json(files: Vec<FileEntry>) {
+    let file_json = serde_json::to_string(&files).unwrap_or("Cannot parse json".to_string());
+    println!("{}", file_json);
+}
+
+fn print_as_table(files: Vec<FileEntry>) {
+    let mut table = Table::new(files);
+    table.with(Style::rounded());
+    table.modify(Columns::first(), Color::FG_RED);
+    table.modify(Columns::one(3), Color::FG_BRIGHT_MAGENTA);
+    table.modify(Rows::first(), Color::FG_BRIGHT_GREEN);
+    println!("{}", table);
 }
