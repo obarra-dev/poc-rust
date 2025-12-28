@@ -20,6 +20,8 @@ pub fn add(left: u64, right: u64) -> u64 {
 
 #[cfg(test)]
 mod tests {
+    use crate::get_address_i32;
+
     #[test]
     fn test_type_of_using_super() {
         use super::type_of;
@@ -34,6 +36,15 @@ mod tests {
 
         let s = String::from("omar");
         assert_eq!(type_of(&s), "alloc::string::String");
+    }
+
+    #[test]
+    fn get_address_test() {
+        let v = 4;
+        let addr = format!("{:p}", &v);
+        let addr1 = get_address_i32(&v);
+        assert_eq!(addr1, addr);
+        // TODO question: how to test it is valid addres or it is the same address?
     }
 
     #[test]
