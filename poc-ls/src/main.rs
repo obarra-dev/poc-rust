@@ -10,7 +10,7 @@ use tabled::settings::object::{Columns, Rows};
 use tabled::settings::{Color, Style};
 use tabled::{Table, Tabled};
 
-#[derive(Parser, Debug)]
+#[derive(Parser)]
 #[command(version)]
 struct CLI {
     path: Option<PathBuf>,
