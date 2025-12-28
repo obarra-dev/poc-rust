@@ -9,10 +9,9 @@ fn type_alias() {
 
     // type alias for Result
     type MyRes<i32> = Result<i32, std::num::ParseIntError>;
-    let r: MyRes<i32> =  "omar".parse::<i32>();
+    let r: MyRes<i32> = "omar".parse::<i32>();
     assert_eq!(r.unwrap_err().to_string(), "invalid digit found in string");
-    
-    let r: MyRes<i32> =  "4".parse::<i32>();
+
+    let r: MyRes<i32> = "4".parse::<i32>();
     assert_eq!(r.unwrap(), 4);
-    
 }

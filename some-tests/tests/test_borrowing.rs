@@ -167,7 +167,7 @@ fn reference_using_as_ref() {
     let s = String::from("omar");
     // & does that via deref coercions. That works only for things that implement the Deref trait.
     // TODO  why does it need explicit type &str?
-    let x:&str = s.as_ref();
+    let x: &str = s.as_ref();
 
     assert_eq!(x, "omar");
     assert_eq!(type_of(&x), "&str");

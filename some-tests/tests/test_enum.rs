@@ -109,7 +109,6 @@ fn enum_several_variant_test() {
             _ => panic!("NEVER LET THIS RUN"),
         }
     }
-
 }
 
 #[test]
@@ -118,17 +117,23 @@ fn enum_constructor_like_function_test() {
     enum Message {
         Write(String),
     }
-    
+
     let v = vec!["Hello".to_string(), "World".to_string()];
 
     // enum constructor can also be used like a function
     let v1: Vec<Message> = v.into_iter().map(Message::Write).collect();
-    assert_eq!(v1, vec![Message::Write("Hello".to_string()), Message::Write("World".to_string())]);
+    assert_eq!(
+        v1,
+        vec![
+            Message::Write("Hello".to_string()),
+            Message::Write("World".to_string())
+        ]
+    );
 
     fn foo(x: String) -> Message {
-         Message::Write(x)
-        }
-        
+        Message::Write(x)
+    }
+
     let x = foo("Hello, world".to_string());
     assert_eq!(x, Message::Write("Hello, world".to_string()));
 }

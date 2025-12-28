@@ -15,7 +15,7 @@ fn compound_data_type_tuple() {
     assert_eq!(tuple.2, 5);
     assert_eq!(tuple.1, false);
     assert_eq!(tuple.0, 'd');
-    
+
     let tuple = (1u8, 3i64, (1, 2), "omar", String::from("barra"));
     assert_eq!(tuple.0, 1);
     assert_eq!(tuple.1, 3);
@@ -86,6 +86,6 @@ fn partial_destructuring_with_ellipsis() {
 fn range_inclusive() {
     // TODO use case? what is?
     // tuple from 1 to 4 inclusive
-    let t =  RangeInclusive::new(1, 4);
+    let t = RangeInclusive::new(1, 4);
     assert_eq!(t, (1..=4));
 }

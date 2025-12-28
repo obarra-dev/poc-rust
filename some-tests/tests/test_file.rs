@@ -1,5 +1,7 @@
-use std::{fs::File, io::{self, Read}};
-
+use std::{
+    fs::File,
+    io::{self, Read},
+};
 
 #[test]
 fn read_file() {
@@ -9,8 +11,10 @@ fn read_file() {
     let s1 = read_file_by_question_mark_op();
     let result = s.unwrap_err().to_string();
     assert_eq!(result, s1.unwrap_err().to_string());
-    assert_eq!(result, "The system cannot find the file specified. (os error 2)");
-
+    assert_eq!(
+        result,
+        "The system cannot find the file specified. (os error 2)"
+    );
 }
 
 fn read_file_by_pattern_matching() -> Result<String, io::Error> {
@@ -26,10 +30,9 @@ fn read_file_by_pattern_matching() -> Result<String, io::Error> {
         Err(error) => Err(error),
     }
 }
-   
+
 fn read_file_by_question_mark_op() -> Result<String, io::Error> {
     let mut s = String::new();
-    File::open("test.txt")?.read_to_string( &mut s)?;
+    File::open("test.txt")?.read_to_string(&mut s)?;
     Ok(s)
 }
-    

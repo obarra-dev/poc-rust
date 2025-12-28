@@ -5,13 +5,13 @@ fn for_and_iterator() {
     let arr = [1, 2, 3];
     let mut count = 0;
     for e in arr {
-        count += e; 
+        count += e;
     }
     assert_eq!(count, 6);
 
-        // it is equivalent to 'for e in arr'
+    // it is equivalent to 'for e in arr'
     for e in arr.into_iter() {
-        count += e; 
+        count += e;
     }
     assert_eq!(count, 12);
 
@@ -48,32 +48,29 @@ fn iterators() {
     let mut count = 0;
     // into_iter takes ownership of the vector
     for e in v.into_iter() {
-        count += e;   
+        count += e;
     }
     assert_eq!(count, 6);
     // does not compile, error: value borrowed here after move
-   // assert_eq!(v, [1, 2, 3]);
+    // assert_eq!(v, [1, 2, 3]);
 
-
-   let v = vec![1, 2, 3];
+    let v = vec![1, 2, 3];
     let mut count = 0;
     // iter does not take ownership of the vector, it is a immutable borrowing
     for e in v.iter() {
-        count += e;   
+        count += e;
     }
     assert_eq!(count, 6);
-   assert_eq!(v, [1, 2, 3]);
+    assert_eq!(v, [1, 2, 3]);
 
-
-   let mut names = vec!["omar", "barra"];
-   // iter_mut takes mutable reference to the vector
-   for name in names.iter_mut() {
-    *name = match name {
-        &mut "barra" => "Barra",
-        _ => "Unknown",
-        
+    let mut names = vec!["omar", "barra"];
+    // iter_mut takes mutable reference to the vector
+    for name in names.iter_mut() {
+        *name = match name {
+            &mut "barra" => "Barra",
+            _ => "Unknown",
+        }
     }
-   }
     assert_eq!(names, ["Unknown", "Barra"]);
 }
 
@@ -86,7 +83,6 @@ fn iter_mut_modifing_first_element() {
     }
     assert_eq!(v, [4, 2, 3]);
 }
-
 
 #[test]
 fn custom_iterator() {
@@ -127,17 +123,17 @@ fn custom_iterator_fibonacci() {
 
     impl Iterator for Fibonacci {
         type Item = u32;
-    
+
         fn next(&mut self) -> Option<Self::Item> {
             let forward = self.curr + self.next;
-    
+
             self.curr = self.next;
             self.next = forward;
-    
+
             Some(self.curr)
         }
     }
-    
+
     // Returns a Fibonacci sequence generator
     fn fibonacci() -> Fibonacci {
         Fibonacci { curr: 0, next: 1 }
@@ -149,7 +145,6 @@ fn custom_iterator_fibonacci() {
     assert_eq!(fib.next(), Some(2));
     assert_eq!(fib.next(), Some(3));
     assert_eq!(fib.next(), Some(5));
-
 }
 
 #[test]
@@ -160,7 +155,6 @@ fn consumer_of_iterator() {
     let total: i32 = it.sum();
     assert_eq!(total, 6);
     assert_eq!(v, [1, 2, 3]);
-
 
     let v = vec![1, 2, 3];
     // iter takes immutable reference to the vector, collector retuns a vector of immutable references

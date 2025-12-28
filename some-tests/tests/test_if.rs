@@ -5,7 +5,6 @@ fn if_test() {
     assert!(number == 5);
 }
 
-
 #[test]
 fn control_flow() {
     let a = "golang";

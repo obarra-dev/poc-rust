@@ -168,7 +168,6 @@ fn new_reference_from_reference() {
     assert_eq!(type_of(x), "i32");
     assert_eq!(type_of(&x), "&i32");
 
-
     // &* takes a reference to that value, so you get a new reference to the same data
     // The "new reference" is just a new variable, not a new memory location.
     let y = &*x;
@@ -180,10 +179,10 @@ fn new_reference_from_reference() {
     assert_eq!(type_of(y), type_of(x));
     assert_eq!(type_of(&y), type_of(&x));
     // y and x are two reference variables, but both point to the same location in memory
-    assert_eq!(pointer_y, pointer_x); 
+    assert_eq!(pointer_y, pointer_x);
 
     // a new reference to the same data
     let z = &*y;
     let pointer_z = format!("{:p}", z);
-    assert_eq!(pointer_x, pointer_z); 
+    assert_eq!(pointer_x, pointer_z);
 }

@@ -1,4 +1,3 @@
-
 #[test]
 fn assert_with_error_message() {
     let actual = String::from("Hello Barra!");
