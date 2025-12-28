@@ -17,6 +17,7 @@ fn main() {
 
     // Prompt the user for input
     print!("Enter input: ");
+    // immediately flush the output buffer to ensure the prompt is displayed before waiting for input.
     io::stdout().flush().unwrap();
 
     let mut input = String::new();
