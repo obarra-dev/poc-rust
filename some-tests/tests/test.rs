@@ -29,22 +29,6 @@ fn unit_type() {
 }
 
 #[test]
-fn compound_data_type_array() {
-    let array = [2, 3, 4];
-    assert_eq!(array[2], 4);
-
-    // the size is mandatory
-    // it cannot be emtpy
-    // you cannot add or remove elements
-    let array_explicit: [u32; 4] = [2, 3, 4, 5];
-    assert_eq!(array_explicit[3], 5);
-
-    let mut array = [2, 3, 4];
-    array[0] = 5;
-    assert_eq!(array[0], 5);
-}
-
-#[test]
 fn arithmetic_type_casting() {
     // 1024 + 255 + 63 + 255
     // perform math operation on diff number systemdd
@@ -105,7 +89,7 @@ fn arithmetic_overflow_fixed() {
 
 #[test]
 fn function_and_expression() {
-    // expression is a function, macro, {} due to they retuns something
+    // expression is a function, macro, {} due to they return something
     let a = {
         let x = 3;
         x + 1
@@ -139,7 +123,7 @@ fn my_function(x: i32) -> i32 {
 #[should_panic]
 fn diverging_function() {
     never_return();
-    // the next line is unrechable
+    // the next line is unreachable
 }
 
 fn never_return() -> ! {
@@ -161,7 +145,7 @@ fn get_option(a: u8) -> Option<i32> {
     };
 
     return r;
-    // Rather that return None, we use a divergin function instead
+    // Rather that return None, we use a diverging function instead
     // TODO check it out
     never_return();
 }
@@ -172,5 +156,5 @@ fn get_address_test() {
     println!("{:p}", &v);
     let addr = get_address_i32(&v);
     println!("{}", addr);
-    // question: how to test it is valid addres or it is the same address?
+    // TODO question: how to test it is valid addres or it is the same address?
 }

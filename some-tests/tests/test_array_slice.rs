@@ -1,11 +1,16 @@
 #[test]
-fn array() {
+fn compound_data_type_array() {
     // infers the type is [i32; 3]
     let arr = [1, 2, 3];
     // allocated on the stack so the memory they occupy is fixed for their entire lifetime.
     assert_eq!(arr.len(), 3);
+    assert_eq!(arr[2], 3);
     //size_of_val returns the bytes which an array occupies in memory
     assert_eq!(std::mem::size_of_val(&arr), 12);
+
+    // for empty array the size is mandatory
+    let array_explicit: [u32; 0] = [];
+    assert_eq!(array_explicit, []);
 
     // all elements in an array can be initialized with the same value at once
     let arr = [4; 4];
