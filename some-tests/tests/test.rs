@@ -28,49 +28,6 @@ fn unit_type() {
     assert_eq!(explicitly_ret_unit(), implicitly_ret_unit());
 }
 
-struct Point {
-    x: i32,
-    y: i32,
-}
-
-#[test]
-fn tuple_destructuring() {
-    let (x, y, z) = ('o', true, 4);
-    assert_eq!(z, 4);
-    assert_eq!(y, true);
-    assert_eq!(x, 'o');
-
-    let (mut x, y, z) = ('o', true, 4);
-    x = 'd';
-    assert_eq!(z, 4);
-    assert_eq!(y, true);
-    assert_eq!(x, 'd');
-
-    // can change the order
-    let (z, y, x) = ('o', true, 4);
-    assert_eq!(x, 4);
-    assert_eq!(y, true);
-    assert_eq!(z, 'o');
-
-    // Destructuring assignments
-    // one line instead of 2 lines
-    let (a, b);
-    // let is no neded, destructuring the first one
-    (a, ..) = (3, 4);
-    // destructuring the second one
-    [.., b] = [1, 2];
-    assert_eq!([a, b], [3, 2]);
-}
-
-#[test]
-fn destructuring_struct() {
-    let p = Point { x: 1, y: 2 };
-    // destructuring the struct
-    let Point { x, y } = p;
-    assert_eq!(x, 1);
-    assert_eq!(y, 2);
-}
-
 #[test]
 fn compound_data_type_array() {
     let array = [2, 3, 4];

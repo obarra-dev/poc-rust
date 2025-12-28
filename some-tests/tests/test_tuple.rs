@@ -44,7 +44,48 @@ fn tuple_as_argument_and_return_value() {
 
     let tuple = sum_multiply((4, 2));
     assert_eq!(tuple, (6, 2));
+}
 
+#[test]
+fn tuple_destructuring() {
+    // Destructuring assignments
+    // destructuring a tuple, allow one line assignment instead of multiple lines
+    let (x, y, z) = ('o', true, 4);
+    assert_eq!(z, 4);
+    assert_eq!(y, true);
+    assert_eq!(x, 'o');
+
+    let (mut x, y, z) = ('o', true, 4);
+    x = 'd';
+    assert_eq!(z, 4);
+    assert_eq!(y, true);
+    assert_eq!(x, 'd');
+
+    // can change the order
+    let t = ('o', true, 4);
+    let (z, y, x) = t;
+    assert_eq!(x, 4);
+    assert_eq!(y, true);
+    assert_eq!(z, 'o');
+}
+
+#[test]
+fn partial_destructuring_with_ellipsis() {
+    // a and b are not defined yet so they cannot be used unitil initialized
+    let (a, b);
+    // destructuring the first one
+    // .. ignores the rest of the elements
+    (a, ..) = (3, 4);
+    // destructuring the second one
+    [.., b] = [1, 2];
+    assert_eq!([a, b], [3, 2]);
+    assert_eq!((a, b), (3, 2));
+}
+
+#[test]
+fn range_inclusive() {
+    // TODO use case? what is?
     // tuple from 1 to 4 inclusive
-    assert_eq!((1..=4), RangeInclusive::new(1, 4));
+    let t =  RangeInclusive::new(1, 4);
+    assert_eq!(t, (1..=4));
 }

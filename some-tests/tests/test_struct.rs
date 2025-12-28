@@ -88,3 +88,17 @@ fn unit_like_structs() {
     let _unit_like_struct = UnitLikeStruct;
     // TODO
 }
+
+#[test]
+fn destructuring_struct() {
+    struct Point {
+        x: i32,
+        y: i32,
+    }
+
+    let p = Point { x: 1, y: 2 };
+    // destructuring the struct
+    let Point { x, y } = p;
+    assert_eq!(x, 1);
+    assert_eq!(y, 2);
+}
