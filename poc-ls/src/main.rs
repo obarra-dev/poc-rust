@@ -1,6 +1,7 @@
 use std::fs;
 use std::fs::DirEntry;
 use std::path::{Path, PathBuf};
+use chrono::{DateTime, Utc};
 use clap::Parser;
 use owo_colors::{OwoColorize};
 use strum_macros::Display;
@@ -46,9 +47,9 @@ fn main() {
         let files = get_files(&path);
         let mut table = Table::new(files);
         table.with(Style::rounded());
-        table.modify(Rows::first(), Color::FG_BRIGHT_GREEN);
         table.modify(Columns::first(), Color::FG_RED);
         table.modify(Columns::one(3), Color::FG_BRIGHT_MAGENTA);
+        table.modify(Rows::first(), Color::FG_BRIGHT_GREEN);
         println!("{}", table);
     } else {
         eprintln!("{}", "Error reading path.".red());
@@ -82,7 +83,12 @@ fn add_file(file_entry: DirEntry, files: &mut Vec<FileEntry>) {
                 EntryType::File
             },
             len_byte: metadata.len(),
-            modified: "".to_string(),
+            modified: if let Ok(modified) = metadata.modified() {
+                let datetime: DateTime<Utc> = modified.into();
+                format!("{}", datetime.format("%Y-%m-%d %H:%M"))
+            } else {
+                String::default()
+            },
         })
     }
 
