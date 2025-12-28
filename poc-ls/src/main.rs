@@ -1,5 +1,6 @@
 use std::fs;
-use std::path::PathBuf;
+use std::fs::metadata;
+use std::path::{Path, PathBuf};
 use clap::Parser;
 use owo_colors::OwoColorize;
 
@@ -21,9 +22,28 @@ fn main() {
         }
 
         println!("{} exists", path.display());
+        for file in get_files(&path) {
+            println!("{}", file);
+        }
     } else {
         eprintln!("{}", "Error reading path.".red());
     }
 
     println!("Hello, world!");
+}
+
+fn get_files(path: &Path) -> Vec<String> {
+    let mut files = Vec::default();
+    if let Ok(entries) = fs::read_dir(path) {
+        for entry in entries {
+            // TODO what can I do with error?
+            if let Ok(entry) = entry {
+                files.push(entry.file_name()
+                    .into_string()
+                    .unwrap_or("unknown file".to_string()));
+            }
+        }
+    }
+
+    files
 }
