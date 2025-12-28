@@ -73,12 +73,13 @@ fn struct_test() {
     // print!("{:?}", user);
 }
 
-struct Color(u8, u8, u8);
-
 #[test]
 fn tuple_struct() {
+    struct Color(u8, u8, u8);
     let color = Color(255, 0, 0);
     assert_eq!(color.0, 255);
+    assert_eq!(color.1, 0);
+    assert_eq!(color.2, 0);
 }
 
 #[test]
