@@ -1,13 +1,13 @@
+use chrono::{DateTime, Utc};
+use clap::Parser;
+use owo_colors::OwoColorize;
 use std::fs;
 use std::fs::DirEntry;
 use std::path::{Path, PathBuf};
-use chrono::{DateTime, Utc};
-use clap::Parser;
-use owo_colors::{OwoColorize};
 use strum_macros::Display;
-use tabled::{Table, Tabled};
 use tabled::settings::object::{Columns, Rows};
 use tabled::settings::{Color, Style};
+use tabled::{Table, Tabled};
 
 #[derive(Parser, Debug)]
 #[command(version)]
@@ -24,9 +24,9 @@ enum EntryType {
 #[derive(Debug, Tabled)]
 struct FileEntry {
     #[tabled(rename = "Name")]
-    name : String,
+    name: String,
     #[tabled(rename = "Type")]
-    e_type : EntryType,
+    e_type: EntryType,
     #[tabled(rename = "Size B")]
     len_byte: u64,
     modified: String,
@@ -74,8 +74,10 @@ fn get_files(path: &Path) -> Vec<FileEntry> {
 
 fn add_file(file_entry: DirEntry, files: &mut Vec<FileEntry>) {
     if let Ok(metadata) = fs::metadata(&file_entry.path()) {
-        files.push(FileEntry{
-            name: file_entry.file_name().into_string()
+        files.push(FileEntry {
+            name: file_entry
+                .file_name()
+                .into_string()
                 .unwrap_or("unknown file".to_string()),
             e_type: if metadata.is_dir() {
                 EntryType::Directory
@@ -91,5 +93,4 @@ fn add_file(file_entry: DirEntry, files: &mut Vec<FileEntry>) {
             },
         })
     }
-
 }
