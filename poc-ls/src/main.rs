@@ -49,21 +49,21 @@ fn main() {
         println!("{} exists", path.display());
         let files = get_files(&path);
         if cli.json {
-            println!("JSON files:");
-            let file_json =
-                serde_json::to_string(&files).unwrap_or("Cannot parse json".to_string());
-            println!("{}", file_json);
+            print_as_json(files);
         } else {
-            print_table(files);
+            print_as_table(files);
         }
     } else {
         eprintln!("{}", "Error reading path.".red());
     }
-
-    println!("Hello, world!");
 }
 
-fn print_table(files: Vec<FileEntry>) {
+fn print_as_json(files: Vec<FileEntry>) {
+    let file_json = serde_json::to_string(&files).unwrap_or("Cannot parse json".to_string());
+    println!("{}", file_json);
+}
+
+fn print_as_table(files: Vec<FileEntry>) {
     let mut table = Table::new(files);
     table.with(Style::rounded());
     table.modify(Columns::first(), Color::FG_RED);
