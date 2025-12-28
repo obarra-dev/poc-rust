@@ -2,8 +2,11 @@ use std::fs;
 use std::fs::DirEntry;
 use std::path::{Path, PathBuf};
 use clap::Parser;
-use owo_colors::OwoColorize;
-use tabled::Tabled;
+use owo_colors::{OwoColorize};
+use strum_macros::Display;
+use tabled::{Table, Tabled};
+use tabled::settings::object::{Columns, Rows};
+use tabled::settings::{Color, Style};
 
 #[derive(Parser, Debug)]
 #[command(version)]
@@ -11,13 +14,13 @@ struct CLI {
     path: Option<PathBuf>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Display)]
 enum EntryType {
     File,
     Directory,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Tabled)]
 struct FileEntry {
     name : String,
     e_type : EntryType,
@@ -37,9 +40,13 @@ fn main() {
         }
 
         println!("{} exists", path.display());
-        for file in get_files(&path) {
-            println!("{:?}", file);
-        }
+        let files = get_files(&path);
+        let mut table = Table::new(files);
+        table.with(Style::rounded());
+        table.modify(Rows::first(), Color::FG_BRIGHT_GREEN);
+        table.modify(Columns::first(), Color::FG_RED);
+        table.modify(Columns::one(3), Color::FG_BRIGHT_MAGENTA);
+        println!("{}", table);
     } else {
         eprintln!("{}", "Error reading path.".red());
     }
