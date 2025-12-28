@@ -1,6 +1,7 @@
 mod helpers;
 mod operations;
 use std::io;
+use std::io::Write;
 
 fn main() {
     println!("Hello, world omar!");
@@ -13,6 +14,10 @@ fn main() {
 
     let full_name: String = helpers::sub_module_helpers::get_full_name("omar", "barra");
     println!("full name is {:?}", full_name);
+
+    // Prompt the user for input
+    print!("Enter input: ");
+    io::stdout().flush().unwrap();
 
     let mut input = String::new();
     io::stdin()
