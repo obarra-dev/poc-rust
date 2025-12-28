@@ -31,7 +31,7 @@ fn unit_type() {
 #[test]
 fn arithmetic_type_casting() {
     // 1024 + 255 + 63 + 255
-    // perform math operation on diff number systemdd
+    // perform math operation on diff number system
     let v = 1_024 + 0xFF + 0o77 + 0b1111_1111;
     assert_eq!(v, 1597);
 
@@ -42,7 +42,7 @@ fn arithmetic_type_casting() {
     let x = (i32::MAX as i64) + 1;
     let y = 10_i32;
     let z = x as i32 / y;
-    // there is an overflow but it is not catched
+    // there is an overflow but it is not caught
     assert_eq!(z, -214_748_364);
 
     let cond = 3.2 > (8 as f32);
