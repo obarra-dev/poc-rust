@@ -1,6 +1,7 @@
 use chrono::{DateTime, Utc};
 use clap::Parser;
 use owo_colors::OwoColorize;
+use serde::Serialize;
 use std::fs;
 use std::fs::DirEntry;
 use std::path::{Path, PathBuf};
@@ -13,15 +14,17 @@ use tabled::{Table, Tabled};
 #[command(version)]
 struct CLI {
     path: Option<PathBuf>,
+    #[arg(short, long)]
+    json: bool,
 }
 
-#[derive(Debug, Display)]
+#[derive(Debug, Display, Serialize)]
 enum EntryType {
     File,
     Directory,
 }
 
-#[derive(Debug, Tabled)]
+#[derive(Debug, Tabled, Serialize)]
 struct FileEntry {
     #[tabled(rename = "Name")]
     name: String,
@@ -45,17 +48,28 @@ fn main() {
 
         println!("{} exists", path.display());
         let files = get_files(&path);
-        let mut table = Table::new(files);
-        table.with(Style::rounded());
-        table.modify(Columns::first(), Color::FG_RED);
-        table.modify(Columns::one(3), Color::FG_BRIGHT_MAGENTA);
-        table.modify(Rows::first(), Color::FG_BRIGHT_GREEN);
-        println!("{}", table);
+        if cli.json {
+            println!("JSON files:");
+            let file_json =
+                serde_json::to_string(&files).unwrap_or("Cannot parse json".to_string());
+            println!("{}", file_json);
+        } else {
+            print_table(files);
+        }
     } else {
         eprintln!("{}", "Error reading path.".red());
     }
 
     println!("Hello, world!");
+}
+
+fn print_table(files: Vec<FileEntry>) {
+    let mut table = Table::new(files);
+    table.with(Style::rounded());
+    table.modify(Columns::first(), Color::FG_RED);
+    table.modify(Columns::one(3), Color::FG_BRIGHT_MAGENTA);
+    table.modify(Rows::first(), Color::FG_BRIGHT_GREEN);
+    println!("{}", table);
 }
 
 fn get_files(path: &Path) -> Vec<FileEntry> {
