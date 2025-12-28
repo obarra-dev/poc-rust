@@ -1,5 +1,3 @@
-use some_tests::get_address_i32;
-
 #[test]
 fn expression_test() {
     // expression is a function, macro, {} due to they return something
