@@ -4,7 +4,7 @@ use axum::{
     http::StatusCode,
     routing::{get, patch},
 };
-
+use axum::routing::delete;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::PgPool;
@@ -35,6 +35,7 @@ async fn main() {
     let router = Router::new()
         .route("/", get(|| async { "Hello, World!" }))
         .route("/tasks", get(get_task).post(create_task))
+        .route("/tasks/:task_id", patch(update_task).delete(delete_task))
         .with_state(db_pool);
 
     axum::serve(listener, router)
@@ -87,6 +88,31 @@ async fn get_task(
         })?;
 
     Ok((StatusCode::CREATED, json!(rows).to_string()))
+}
+
+async fn update_task(
+    State(db_pool): State<PgPool>,
+    Path(task_id): Path<i32>,
+    Json(task): Json<UpdateTaskReq>,
+) -> Result<(StatusCode, String), (StatusCode, String)> {
+    todo!()
+}
+
+async fn delete_task(
+    State(db_pool): State<PgPool>,
+    Path(task_id): Path<i32>,
+) -> Result<(StatusCode, String), (StatusCode, String)> {
+    sqlx::query!("DELETE FROM tasks WHERE task_id = $1", task_id)
+        .execute(&db_pool)
+        .await
+        .map_err(|e| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                json!({"success": false, "message": e.to_string()}).to_string(),
+            )
+        })?;
+
+    Ok((StatusCode::NO_CONTENT, json!({"success": true}).to_string()))
 }
 
 #[derive(Serialize)]
