@@ -72,8 +72,28 @@ async fn create_task(
     ))
 }
 
-async fn get_task() -> axum::response::Response {
-    todo!()
+// TODO State(pg_pool) learn more
+async fn get_task(
+    State(pg_pool): State<PgPool>,
+) -> Result<(StatusCode, String), (StatusCode, String)> {
+    let rows = sqlx::query_as!(TaskRow, "SELECT * FROM tasks")
+        .fetch_all(&pg_pool)
+        .await
+        .map_err(|e| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                json!({"success": false, "message": e.to_string()}).to_string(),
+            )
+        })?;
+
+    Ok((StatusCode::CREATED, json!(rows).to_string()))
+}
+
+#[derive(Serialize)]
+struct TaskRow {
+    task_id: i32,
+    name: String,
+    priority: Option<i32>,
 }
 
 #[derive(Deserialize)]
@@ -85,4 +105,10 @@ struct CreateTaskReq {
 #[derive(Serialize)]
 struct CreateTaskRow {
     task_id: i32,
+}
+
+#[derive(Deserialize)]
+struct UpdateTaskReq {
+    name: Option<String>,
+    priority: Option<i32>,
 }
