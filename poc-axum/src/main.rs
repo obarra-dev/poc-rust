@@ -11,6 +11,23 @@ use tokio::net::TcpListener;
 
 #[tokio::main]
 async fn main() {
+    //run_hello_world().await;
+
+    run_basic_crud().await;
+    println!("Hello, world!");
+}
+
+
+async fn run_hello_world() {
+    // build our application with a single route
+    let app = Router::new().route("/", get(|| async { "Hello, World!" }));
+
+    // run our app with hyper, listening globally on port 3000
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    axum::serve(listener, app).await.unwrap();
+}
+
+async fn run_basic_crud() {
     // TODO how this load the properties?
     dotenvy::dotenv().expect("Failed to initialize dotenvy.");
     let server_address =
