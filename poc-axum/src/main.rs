@@ -1,4 +1,3 @@
-use axum::routing::delete;
 use axum::{
     Json, Router,
     extract::{Path, State},
@@ -7,8 +6,7 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use sqlx::PgPool;
-use sqlx::postgres::PgPoolOptions;
+use sqlx::{PgPool, postgres::PgPoolOptions};
 use tokio::net::TcpListener;
 
 #[tokio::main]
