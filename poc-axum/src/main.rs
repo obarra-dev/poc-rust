@@ -4,6 +4,7 @@ use axum::{
     http::StatusCode,
     routing::{get, patch},
 };
+use axum::response::IntoResponse;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::{PgPool, postgres::PgPoolOptions};
@@ -27,10 +28,15 @@ async fn run_hello_world() {
         concat
     }
 
+    async fn health_check() -> impl IntoResponse {
+        Json(json!({ "status": "ok", "message": "Server is running!" }))
+    }
+
     let app = Router::new()
         .route("/", get(|| async { "Hello, World!" }))
         .route("/hello", get(hello_world))
-        .route("/mirror", get(mirror_body_string));
+        .route("/mirror", get(mirror_body_string))
+        .route("/health", get(health_check));
 
     // run our app with hyper, listening globally on port 3000
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
