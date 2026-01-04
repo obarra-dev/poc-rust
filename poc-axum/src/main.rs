@@ -67,7 +67,7 @@ async fn create_task(
     // TODO how works State? idem Json
     State(db_pool): State<PgPool>,
     Json(task): Json<CreateTaskReq>,
-) -> Result<(StatusCode, String), (StatusCode, String)> {
+) -> Result<(StatusCode), (StatusCode, String)> {
     dbg!(&task);
 
     // when the table task is not db, this line throws error: "error: error returned from database: relation "tasks" does not exist"
@@ -88,16 +88,13 @@ async fn create_task(
         )
     })?;
 
-    Ok((
-        StatusCode::CREATED,
-        json!({"success": true, "data": row}).to_string(),
-    ))
+    Ok(StatusCode::CREATED)
 }
 
 // TODO State(pg_pool) learn more
 async fn get_tasks(
     State(pg_pool): State<PgPool>,
-) -> Result<(StatusCode, String), (StatusCode, String)> {
+) -> Result<Json<Vec<TaskRow>>, (StatusCode, String)> {
     let rows = sqlx::query_as!(TaskRow, "SELECT * FROM tasks")
         .fetch_all(&pg_pool)
         .await
@@ -109,14 +106,14 @@ async fn get_tasks(
         })?;
 
     // TODO return json itself not a string
-    Ok((StatusCode::CREATED, json!(rows).to_string()))
+    Ok(Json(rows))
 }
 
 async fn update_task(
     State(db_pool): State<PgPool>,
     Path(task_id): Path<i32>,
     Json(task): Json<UpdateTaskReq>,
-) -> Result<(StatusCode, String), (StatusCode, String)> {
+) -> Result<(), (StatusCode, String)> {
     let mut query = "UPDATE tasks SET task_id = $1".to_owned();
     let mut i = 2;
     if task.name.is_some() {
@@ -146,13 +143,13 @@ async fn update_task(
         )
     })?;
 
-    Ok((StatusCode::OK, json!({"success": true}).to_string()))
+    Ok(())
 }
 
 async fn delete_task(
     State(db_pool): State<PgPool>,
     Path(task_id): Path<i32>,
-) -> Result<(StatusCode, String), (StatusCode, String)> {
+) -> Result<(StatusCode), (StatusCode, String)> {
     sqlx::query!("DELETE FROM tasks WHERE task_id = $1", task_id)
         .execute(&db_pool)
         .await
@@ -163,8 +160,7 @@ async fn delete_task(
             )
         })?;
 
-    // TODO if I use no content the timer in postman does not stop why?
-    Ok((StatusCode::OK, json!({"success": true}).to_string()))
+    Ok(StatusCode::NO_CONTENT)
 }
 
 #[derive(Serialize)]
