@@ -11,22 +11,26 @@ use tokio::net::TcpListener;
 
 #[tokio::main]
 async fn main() {
-    //run_hello_world().await;
+    run_hello_world().await;
 
-    run_basic_crud().await;
+    //run_basic_crud().await;
     println!("Hello, world!");
 }
 
-async fn mirror_body_string(body: String) -> String {
-    println!("body: {}", body);
-    body
-}
 async fn run_hello_world() {
-    // build our application with a single route
+    async fn hello_world() -> String {
+        "Hello, World2!".to_string()
+    }
+
+    async fn mirror_body_string(body: String) -> String {
+        let concat = format!("body: {}", body);
+        concat
+    }
+
     let app = Router::new()
-        .route("/", get(|| async { "Hello, World!" }));
-    // TODO why this does not work?
-       // .route("/mirror_body_string", mirror_body_string);
+        .route("/", get(|| async { "Hello, World!" }))
+        .route("/hello", get(hello_world))
+        .route("/mirror", get(mirror_body_string));
 
     // run our app with hyper, listening globally on port 3000
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
