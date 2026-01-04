@@ -3,11 +3,10 @@ use axum::{
     Json, Router,
     extract::{Path, State},
     http::StatusCode,
-    routing::{get, patch},
+    routing::get,
 };
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
-use serde_json::json;
+use serde_json::{Value, json};
 use sqlx::{PgPool, postgres::PgPoolOptions};
 use tokio::net::TcpListener;
 
@@ -19,7 +18,44 @@ async fn main() {
     println!("Hello, world!");
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use axum::body::Body;
+    use axum::http::Request;
+    use http_body_util::BodyExt;
+    use tower::ServiceExt;
+    #[tokio::test]
+    async fn test() {
+        let app = create_hello_world_router();
+        let request = Request::builder()
+            .uri("/health")
+            .body(Body::empty())
+            .unwrap();
+
+        let response = app
+            // oneshot is provided by tower TODO why that works?
+            .oneshot(request)
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+
+        let body = response.collect().await.unwrap();
+        let json: Value = serde_json::from_slice(&body.to_bytes()).unwrap();
+        assert_eq!(json["status"], "ok");
+        assert_eq!(json["message"], "Server is running!");
+    }
+}
+
 async fn run_hello_world() {
+    let app = create_hello_world_router();
+
+    // run our app with hyper, listening globally on port 3000
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    axum::serve(listener, app).await.unwrap();
+}
+
+fn create_hello_world_router() -> Router {
     async fn hello_world() -> String {
         "Hello, World2!".to_string()
     }
@@ -47,10 +83,7 @@ async fn run_hello_world() {
         .route("/mirror", get(mirror_body_string))
         .route("/health", get(health_check))
         .route("/get_by/{id}", get(get_by));
-
-    // run our app with hyper, listening globally on port 3000
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
-    axum::serve(listener, app).await.unwrap();
+    app
 }
 
 async fn run_basic_crud() {
