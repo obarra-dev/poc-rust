@@ -40,12 +40,12 @@ fn vector() {
 #[test]
 fn vector_methods() {
     // getting individual elements
-    let v = vec![1, 2, 3];
-    let mut count = 0;
+    let v = vec![1, 2, 4];
+    let mut sum_values = 0;
     for i in &v {
-        count = count + *i;
+        sum_values = sum_values + *i;
     }
-    assert_eq!(count, 6);
+    assert_eq!(sum_values, 7);
 
     let v = Vec::from([1, 2, 3]);
     let mut v1: Vec<i32> = Vec::new();
@@ -57,21 +57,25 @@ fn vector_methods() {
     v.push(1);
     v.push(2);
     assert_eq!(v, vec![1, 2]);
-    let d = v.pop();
-    assert_eq!(d, Some(2));
+
+    // remove and return the last element
+    let option = v.pop();
+    assert_eq!(option, Some(2));
     assert_eq!(v, vec![1]);
 
-    let v = Vec::from([1]);
+    let v = Vec::from([1, 4]);
     let mut s = String::new();
-    for i in 0..2 {
+    for i in 0..3 {
         // this will panic if the index is out of bounds
         //let m = v[i];
 
         // get(i) is the safe way to get an element
-        let aux = format!("{:?}", v.get(i));
+        // only get a reference it does not remove from vector
+        let option = v.get(i);
+        let aux = format!("{:?}", option);
         s.push_str(&aux);
     }
-    assert_eq!(s, "Some(1)None");
+    assert_eq!(s, "Some(1)Some(4)None");
 
     let mut v = Vec::from([1, 2, 3]);
     for i in 0..5 {
