@@ -11,13 +11,11 @@ use tokio::net::TcpListener;
 
 #[tokio::main]
 async fn main() {
+    // TODO how this load the properties?
     dotenvy::dotenv().expect("Failed to initialize dotenvy.");
     let server_address =
         std::env::var("SERVER_ADDRESS").unwrap_or_else(|_| "127.0.0.1:8080".to_owned());
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-
-    println!("Connecting to {}...", server_address);
-    println!("Connecting to {}...", database_url);
 
     let db_pool = PgPoolOptions::new()
         .max_connections(16)
@@ -25,16 +23,16 @@ async fn main() {
         .await
         .expect("Failed to connect to database");
 
-    let listener = TcpListener::bind(server_address)
-        .await
-        .expect("Failed to bind to address");
-    println!("Listening on {}", listener.local_addr().unwrap());
-
     let router = Router::new()
         .route("/", get(|| async { "Hello, World!" }))
         .route("/tasks", get(get_task).post(create_task))
         .route("/tasks/{task_id}", patch(update_task).delete(delete_task))
         .with_state(db_pool);
+
+    let listener = TcpListener::bind(server_address)
+        .await
+        .expect("Failed to bind to address");
+    println!("Listening on {}", listener.local_addr().unwrap());
 
     axum::serve(listener, router)
         .await
@@ -44,6 +42,7 @@ async fn main() {
 }
 
 async fn create_task(
+    // TODO how works State? idem Json
     State(db_pool): State<PgPool>,
     Json(task): Json<CreateTaskReq>,
 ) -> Result<(StatusCode, String), (StatusCode, String)> {
