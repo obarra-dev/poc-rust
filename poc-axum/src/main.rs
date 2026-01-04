@@ -12,9 +12,9 @@ use tokio::net::TcpListener;
 
 #[tokio::main]
 async fn main() {
-    run_hello_world().await;
+   // run_hello_world().await;
 
-    //run_basic_crud().await;
+    run_basic_crud().await;
     println!("Hello, world!");
 }
 
@@ -195,4 +195,25 @@ struct CreateTaskRow {
 struct UpdateTaskReq {
     name: Option<String>,
     priority: Option<i32>,
+}
+
+enum  MyApiError {
+    NotFound,
+    InvalidInput(String),
+    InternalError,
+}
+
+impl IntoResponse for MyApiError {
+    fn into_response(self) -> axum::response::Response {
+        let (status, error_message) = match self {
+            MyApiError::NotFound => (StatusCode::NOT_FOUND, "Not Found".to_string()),
+            MyApiError::InvalidInput(msg) => (StatusCode::BAD_REQUEST, msg),
+            MyApiError::InternalError => (StatusCode::INTERNAL_SERVER_ERROR, "Internal Server Error".to_string()),
+        };
+
+        let body = Json(json!({"error": error_message}));
+
+        // TODO how this tuple has into_response?
+        (status, body).into_response()
+    }
 }
