@@ -12,9 +12,9 @@ use tokio::net::TcpListener;
 
 #[tokio::main]
 async fn main() {
-    run_hello_world().await;
+    //run_hello_world().await;
 
-    //run_basic_crud().await;
+    run_basic_crud().await;
     println!("Hello, world!");
 }
 
