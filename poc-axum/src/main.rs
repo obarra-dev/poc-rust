@@ -1,20 +1,21 @@
+use axum::response::IntoResponse;
 use axum::{
     Json, Router,
     extract::{Path, State},
     http::StatusCode,
     routing::{get, patch},
 };
-use axum::response::IntoResponse;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use serde_json::json;
 use sqlx::{PgPool, postgres::PgPoolOptions};
 use tokio::net::TcpListener;
 
 #[tokio::main]
 async fn main() {
-   // run_hello_world().await;
+    run_hello_world().await;
 
-    run_basic_crud().await;
+    //run_basic_crud().await;
     println!("Hello, world!");
 }
 
@@ -32,11 +33,20 @@ async fn run_hello_world() {
         Json(json!({ "status": "ok", "message": "Server is running!" }))
     }
 
+    async fn get_by(Path(id): Path<i32>) -> Result<Json<Value>, MyApiError> {
+        if id < 1 {
+            return Err(MyApiError::InvalidInput("Invalid id".to_owned()));
+        }
+
+        Ok(Json(json!({ "id": id })))
+    }
+
     let app = Router::new()
         .route("/", get(|| async { "Hello, World!" }))
         .route("/hello", get(hello_world))
         .route("/mirror", get(mirror_body_string))
-        .route("/health", get(health_check));
+        .route("/health", get(health_check))
+        .route("/get_by/{id}", get(get_by));
 
     // run our app with hyper, listening globally on port 3000
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
@@ -58,7 +68,10 @@ async fn run_basic_crud() {
 
     let router = Router::new()
         .route("/tasks", get(get_tasks).post(create_task))
-        .route("/tasks/{task_id}", patch(update_task).delete(delete_task))
+        .route(
+            "/tasks/{task_id}",
+            get(get_task).patch(update_task).delete(delete_task),
+        )
         .with_state(db_pool);
 
     let listener = TcpListener::bind(server_address)
@@ -115,8 +128,24 @@ async fn get_tasks(
             )
         })?;
 
-    // TODO return json itself not a string
     Ok(Json(rows))
+}
+
+async fn get_task(
+    State(pg_pool): State<PgPool>,
+    Path(task_id): Path<i32>,
+) -> Result<Json<TaskRow>, (StatusCode, String)> {
+    let row = sqlx::query_as!(TaskRow, "SELECT * FROM tasks WHERE task_id = $1", task_id)
+        .fetch_one(&pg_pool)
+        .await
+        .map_err(|e| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                json!({"success": false, "message": e.to_string()}).to_string(),
+            )
+        })?;
+
+    Ok(Json(row))
 }
 
 async fn update_task(
@@ -197,7 +226,7 @@ struct UpdateTaskReq {
     priority: Option<i32>,
 }
 
-enum  MyApiError {
+enum MyApiError {
     NotFound,
     InvalidInput(String),
     InternalError,
@@ -208,7 +237,10 @@ impl IntoResponse for MyApiError {
         let (status, error_message) = match self {
             MyApiError::NotFound => (StatusCode::NOT_FOUND, "Not Found".to_string()),
             MyApiError::InvalidInput(msg) => (StatusCode::BAD_REQUEST, msg),
-            MyApiError::InternalError => (StatusCode::INTERNAL_SERVER_ERROR, "Internal Server Error".to_string()),
+            MyApiError::InternalError => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Internal Server Error".to_string(),
+            ),
         };
 
         let body = Json(json!({"error": error_message}));
