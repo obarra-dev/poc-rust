@@ -17,10 +17,16 @@ async fn main() {
     println!("Hello, world!");
 }
 
-
+async fn mirror_body_string(body: String) -> String {
+    println!("body: {}", body);
+    body
+}
 async fn run_hello_world() {
     // build our application with a single route
-    let app = Router::new().route("/", get(|| async { "Hello, World!" }));
+    let app = Router::new()
+        .route("/", get(|| async { "Hello, World!" }));
+    // TODO why this does not work?
+       // .route("/mirror_body_string", mirror_body_string);
 
     // run our app with hyper, listening globally on port 3000
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
@@ -41,7 +47,7 @@ async fn run_basic_crud() {
         .expect("Failed to connect to database");
 
     let router = Router::new()
-        .route("/tasks", get(get_task).post(create_task))
+        .route("/tasks", get(get_tasks).post(create_task))
         .route("/tasks/{task_id}", patch(update_task).delete(delete_task))
         .with_state(db_pool);
 
@@ -62,6 +68,8 @@ async fn create_task(
     State(db_pool): State<PgPool>,
     Json(task): Json<CreateTaskReq>,
 ) -> Result<(StatusCode, String), (StatusCode, String)> {
+    dbg!(&task);
+
     // when the table task is not db, this line throws error: "error: error returned from database: relation "tasks" does not exist"
     // throws that in compile time WHY?
     // row is type unknown, TODO why?
@@ -87,7 +95,7 @@ async fn create_task(
 }
 
 // TODO State(pg_pool) learn more
-async fn get_task(
+async fn get_tasks(
     State(pg_pool): State<PgPool>,
 ) -> Result<(StatusCode, String), (StatusCode, String)> {
     let rows = sqlx::query_as!(TaskRow, "SELECT * FROM tasks")
@@ -100,6 +108,7 @@ async fn get_task(
             )
         })?;
 
+    // TODO return json itself not a string
     Ok((StatusCode::CREATED, json!(rows).to_string()))
 }
 
@@ -165,7 +174,7 @@ struct TaskRow {
     priority: Option<i32>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 struct CreateTaskReq {
     name: String,
     priority: Option<i32>,
