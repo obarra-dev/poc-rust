@@ -1,4 +1,6 @@
+use std::thread;
 use std::thread::spawn;
+use std::time::Duration;
 
 #[test]
 fn simple_spawn_thread() {
@@ -8,11 +10,43 @@ fn simple_spawn_thread() {
             x += i ;
         }
 
-        println!("{:?}", x);
+        println!("{x}");
     };
 
+    let max = 10u128;
+    let function2 = move || {
+        let mut x = 0u128;
+        for i in 1..max {
+            x += i ;
+            thread::sleep(Duration::from_millis(10));
+        }
+
+        println!("{x}");
+    };
+
+    // TODO why still I can use max if the ownership was moved, if max is a String it does not compile which is expected
+    println!("{max}");
+
+
     let handle = spawn(function);
-    let handle2 = spawn(function);
+    let handle2 = spawn(function2);
     handle.join().unwrap();
     handle2.join().unwrap();
+}
+
+
+#[test]
+fn simple_spawssn_thread() {
+    let max = 10u128;
+
+    // The 'move' keyword transfers ownership of 'greeting' to the new thread
+    let handle = thread::spawn(move || {
+        println!("{}", max);
+    });
+
+    println!("{max}");
+
+    // You can no longer use 'greeting' in the main thread after the move
+
+    handle.join().unwrap();
 }
