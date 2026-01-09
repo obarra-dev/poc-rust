@@ -1,5 +1,4 @@
 use std::thread;
-use std::thread::spawn;
 use std::time::Duration;
 
 #[test]
@@ -27,9 +26,9 @@ fn simple_spawn_thread() {
     // TODO why still I can use max if the ownership was moved, if max is a String it does not compile which is expected
     println!("{max}");
 
-
-    let handle = spawn(function);
-    let handle2 = spawn(function2);
+    // argument of spaw function is a moving closure
+    let handle = thread::spawn(function);
+    let handle2 = thread::spawn(function2);
     handle.join().unwrap();
     handle2.join().unwrap();
 }
